@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Invoices\Presentation\Http\Data;
 
 use Spatie\LaravelData\Data;
@@ -20,7 +22,7 @@ final class InvoiceData extends Data
             id: $invoice->getId()->toString(),
             status: $invoice->getStatus()->value,
             customerName: $invoice->getCustomerName(),
-            customerEmail: $invoice->getCustomerEmail(),
+            customerEmail: $invoice->getCustomerEmail()->value(),
         );
     }
 }

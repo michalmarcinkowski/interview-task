@@ -1,37 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Invoices\Domain\Models;
 
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
-use Modules\Invoices\Domain\ValueObjects\CustomerData;
-use Modules\Invoices\Domain\ValueObjects\InvoiceProductLine;
+use Modules\Invoices\Domain\ValueObjects\Email;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class Invoice
 {
-    private UuidInterface $id;
+    private function __construct(
+        private UuidInterface $id,
+        private InvoiceStatus $status,
+        private string $customerName,
+        private Email $customerEmail,
+        private array $productLines = []
+    ) { }
 
-    private InvoiceStatus $status;
-
-    private CustomerData $customerData;
-
-    /** @var InvoiceProductLine[] */
-    private array $productLines = [];
-
-    private function __construct(UuidInterface $id, InvoiceStatus $status, CustomerData $customerData, array $productLines = [])
+    public static function create(string $customerName, Email $customerEmail): self
     {
-        $this->id = $id;
-        $this->status = $status;
-        $this->customerData = $customerData;
-        $this->productLines = $productLines;
+        return new self(
+            Uuid::uuid4(),
+            InvoiceStatus::DRAFT,
+            $customerName,
+            $customerEmail
+        );
     }
 
-    public static function create(string $customerName, string $customerEmail): self
-    {
-        $customerData = CustomerData::of($customerName, $customerEmail);
-
-        return new self(Uuid::uuid4(), InvoiceStatus::DRAFT, $customerData);
+    public static function reconstitute(
+        UuidInterface $id,
+        InvoiceStatus $status,
+        string $customerName,
+        Email $customerEmail,
+        array $productLines = []
+    ): self {
+        return new self($id, $status, $customerName, $customerEmail, $productLines);
     }
 
     public function getId(): UuidInterface
@@ -46,16 +51,16 @@ class Invoice
 
     public function getCustomerName(): string
     {
-        return $this->customerData->getName();
+        return $this->customerName;
     }
 
-    public function getCustomerEmail(): string
+    public function getCustomerEmail(): Email
     {
-        return $this->customerData->getEmail();
+        return $this->customerEmail;
     }
 
-    public function hasProductLines()
+    public function hasProductLines(): bool
     {
-        return count($this->productLines) > 0;
+        return !empty($this->productLines);
     }
 }

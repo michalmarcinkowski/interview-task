@@ -7,18 +7,23 @@ namespace Tests\Unit\Invoices\Domain\Models;
 use PHPUnit\Framework\TestCase;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Modules\Invoices\Domain\ValueObjects\Email;
 use Ramsey\Uuid\UuidInterface;
 
 class InvoiceTest extends TestCase
 {
-    public function testCreateInvoiceInDraftStatusWithoutProductLines(): void
+    public function testShouldCreateInvoiceInDraftStatusWithoutProductLines(): void
     {
-        $invoice = Invoice::create('John Doe', 'john@example.com');
+        $customerName = 'John Doe';
+        $customerEmail = Email::fromString('john@example.com');
+
+        $invoice = Invoice::create($customerName, $customerEmail);
+
         $this->assertInstanceOf(Invoice::class, $invoice);
         $this->assertInstanceOf(UuidInterface::class, $invoice->getId());
         $this->assertSame(InvoiceStatus::DRAFT, $invoice->getStatus());
-        $this->assertSame('John Doe', $invoice->getCustomerName());
-        $this->assertSame('john@example.com', $invoice->getCustomerEmail());
-        $this->assertNotTrue($invoice->hasProductLines());
+        $this->assertSame($customerName, $invoice->getCustomerName());
+        $this->assertSame($customerEmail, $invoice->getCustomerEmail());
+        $this->assertFalse($invoice->hasProductLines());
     }
 }

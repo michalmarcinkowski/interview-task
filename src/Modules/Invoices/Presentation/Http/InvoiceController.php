@@ -1,19 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Invoices\Presentation\Http;
 
 use Illuminate\Routing\Controller;
-use Modules\Invoices\Domain\Models\Invoice;
-use Modules\Invoices\Presentation\Http\Data\CreateInvoiceRequest;
+use Modules\Invoices\Application\Services\InvoiceService;
+use Modules\Invoices\Presentation\Http\Request\CreateInvoiceRequest;
 use Modules\Invoices\Presentation\Http\Data\InvoiceData;
 
 class InvoiceController extends Controller
 {
-    public function create(CreateInvoiceRequest $createInvoiceRequest)
+    public function __construct(
+        private InvoiceService $invoiceService
+    ) {}
+    
+    public function create(CreateInvoiceRequest $request)
     {
-        $newInvoice = Invoice::create($createInvoiceRequest->customerName, $createInvoiceRequest->customerEmail);
-        // repo->save($newInvoice)
+        $invoice = $this->invoiceService->create(
+            $request->customerName,
+            $request->customerEmail
+        );
         
-        return InvoiceData::fromDomainModel($newInvoice);
+        return InvoiceData::fromDomainModel($invoice);
     }
 }

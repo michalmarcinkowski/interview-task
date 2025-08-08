@@ -1,6 +1,8 @@
 <?php
 
-namespace Modules\Invoices\Presentation\Http\Data;
+declare(strict_types=1);
+
+namespace Modules\Invoices\Presentation\Http\Request;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Email;
