@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('invoices', static function (Blueprint $table): void {
+        Schema::create('invoices', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('status');
             $table->string('customer_name');
             $table->string('customer_email');
-            $table->string('status');
             $table->timestamps();
         });
     }
