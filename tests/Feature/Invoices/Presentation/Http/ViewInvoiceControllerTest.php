@@ -8,7 +8,8 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Application\Services\InvoiceService;
-use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
+use Modules\Invoices\Domain\Models\Invoice;
 use Ramsey\Uuid\Uuid;
 
 class ViewInvoiceControllerTest extends TestCase
@@ -27,12 +28,11 @@ class ViewInvoiceControllerTest extends TestCase
 
     public function testShouldViewInvoiceSuccessfully(): void
     {
-        // Given the invoice was created
+        // Given I have an invoice
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
         
-        $createInvoiceData = new CreateInvoiceData($customerName, $customerEmail);
-        $invoice = $this->invoiceService->create($createInvoiceData);
+        $invoice = $this->createInvoice($customerName, $customerEmail);
         $invoiceId = $invoice->getId()->toString();
         
         // When I fetch the created invoice
@@ -101,8 +101,8 @@ class ViewInvoiceControllerTest extends TestCase
 
     public function testShouldViewInvoiceWithProductLinesSuccessfully(): void
     {
-        // Create an invoice with product lines using primitive data for DTO
-        $createData = new CreateInvoiceData(
+        // Given I have an invoice with product lines
+        $invoice = $this->createInvoice(
             'John Doe',
             'john@example.com',
             [
@@ -118,14 +118,12 @@ class ViewInvoiceControllerTest extends TestCase
                 ],
             ]
         );
-        
-        $invoice = $this->invoiceService->create($createData);
         $invoiceId = $invoice->getId()->toString();
         
-        // When I fetch the created invoice
+        // When I fetch this invoice
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
         
-        // Then I should see the invoice details (but product lines are not persisted yet)
+        // Then I should see the invoice details with product lines
         $viewResponse->assertStatus(200)
                 ->assertJson([
                     'id' => $invoiceId,
@@ -137,18 +135,37 @@ class ViewInvoiceControllerTest extends TestCase
                     'status',
                     'customerName',
                     'customerEmail',
-                    'productLines',
+                    'productLines' => [
+                        '*' => [
+                            'id',
+                            'productName',
+                            'quantity',
+                            'unitPrice',
+                            'totalUnitPrice',
+                        ],
+                    ],
                 ]);
 
-        // Note: Product lines are not currently persisted to the database
-        // This test reflects the current implementation limitation
+        // Verify product lines data
         $responseData = $viewResponse->json();
-        $this->assertCount(0, $responseData['productLines']);
+        $this->assertCount(2, $responseData['productLines']);
+        
+        $firstProductLine = $responseData['productLines'][0];
+        $this->assertEquals('Product 1', $firstProductLine['productName']);
+        $this->assertEquals(2, $firstProductLine['quantity']);
+        $this->assertEquals(100, $firstProductLine['unitPrice']);
+        $this->assertEquals(200, $firstProductLine['totalUnitPrice']); // 2 * 100
+        
+        $secondProductLine = $responseData['productLines'][1];
+        $this->assertEquals('Product 2', $secondProductLine['productName']);
+        $this->assertEquals(3, $secondProductLine['quantity']);
+        $this->assertEquals(150, $secondProductLine['unitPrice']);
+        $this->assertEquals(450, $secondProductLine['totalUnitPrice']); // 3 * 150
     }
 
     public function testShouldViewInvoiceWithSingleProductLine(): void
     {
-        $createData = new CreateInvoiceData(
+        $invoice = $this->createInvoice(
             'Single Product Customer',
             'single@example.com',
             [
@@ -159,28 +176,25 @@ class ViewInvoiceControllerTest extends TestCase
                 ],
             ]
         );
-        
-        $invoice = $this->invoiceService->create($createData);
         $invoiceId = $invoice->getId()->toString();
         
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
         
         $viewResponse->assertStatus(200);
         
-        // Note: Product lines are not currently persisted to the database
         $responseData = $viewResponse->json();
-        $this->assertCount(0, $responseData['productLines']);
+        $this->assertCount(1, $responseData['productLines']);
+        $this->assertEquals('Single Item', $responseData['productLines'][0]['productName']);
+        $this->assertEquals(500, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
     public function testShouldViewInvoiceWithEmptyProductLines(): void
     {
-        $createData = new CreateInvoiceData(
+        $invoice = $this->createInvoice(
             'Empty Products Customer',
             'empty@example.com',
             []
         );
-        
-        $invoice = $this->invoiceService->create($createData);
         $invoiceId = $invoice->getId()->toString();
         
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
@@ -193,7 +207,7 @@ class ViewInvoiceControllerTest extends TestCase
 
     public function testShouldViewInvoiceWithLargeQuantitiesAndPrices(): void
     {
-        $createData = new CreateInvoiceData(
+        $invoice = $this->createInvoice(
             'Large Numbers Customer',
             'large@example.com',
             [
@@ -204,30 +218,33 @@ class ViewInvoiceControllerTest extends TestCase
                 ],
             ]
         );
-        
-        $invoice = $this->invoiceService->create($createData);
         $invoiceId = $invoice->getId()->toString();
         
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
         
         $viewResponse->assertStatus(200);
-        
-        // Note: Product lines are not currently persisted to the database
         $responseData = $viewResponse->json();
-        $this->assertCount(0, $responseData['productLines']);
+        $this->assertEquals(999 * 999999, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
     private function createMultipleInvoices(int $count): array
     {
         $invoices = [];
         for ($i = 0; $i < $count; $i++) {
-            $createInvoiceData = new CreateInvoiceData(
+            $invoices[] = $this->createInvoice(
                 $this->faker->name(),
                 $this->faker->safeEmail(),
             );
-            $invoices[] = $this->invoiceService->create($createInvoiceData);
         }
-        
         return $invoices;
+    }
+
+    /**
+     * Create an invoice with optional product lines
+     */
+    private function createInvoice(string $customerName, string $customerEmail, array $productLines = []): Invoice
+    {
+        $createInvoiceData = CreateInvoiceCommand::fromValues($customerName, $customerEmail, $productLines);
+        return $this->invoiceService->create($createInvoiceData);
     }
 }

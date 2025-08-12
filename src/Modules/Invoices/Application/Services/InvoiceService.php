@@ -7,7 +7,7 @@ namespace Modules\Invoices\Application\Services;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
-use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Ramsey\Uuid\UuidInterface;
 
 class InvoiceService
@@ -17,7 +17,7 @@ class InvoiceService
         private InvoiceFactoryInterface $factory
     ) {}
     
-    public function create(CreateInvoiceData $data): Invoice
+    public function create(CreateInvoiceCommand $data): Invoice
     {
         $invoice = $this->factory->create($data);
         

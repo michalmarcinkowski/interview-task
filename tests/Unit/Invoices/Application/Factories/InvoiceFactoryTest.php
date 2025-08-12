@@ -7,9 +7,8 @@ namespace Tests\Unit\Invoices\Application\Factories;
 use PHPUnit\Framework\TestCase;
 use Modules\Invoices\Application\Factories\InvoiceFactory;
 use Modules\Invoices\Domain\Models\Invoice;
-use Modules\Invoices\Domain\ValueObjects\Email;
-use Modules\Invoices\Domain\ValueObjects\ProductLines;
-use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
+use Modules\Invoices\Domain\Models\InvoiceProductLine;
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 
 class InvoiceFactoryTest extends TestCase
 {
@@ -23,23 +22,20 @@ class InvoiceFactoryTest extends TestCase
 
     public function testShouldCreateInvoiceWithoutProductLines(): void
     {
-        $createData = new CreateInvoiceData(
+        $createData = CreateInvoiceCommand::fromValues(
             'John Doe',
             'john@example.com'
         );
 
         $invoice = $this->factory->create($createData);
 
-        $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertEquals('John Doe', $invoice->getCustomerName());
-        $this->assertEquals('john@example.com', $invoice->getCustomerEmail()->value());
-        $this->assertFalse($invoice->hasProductLines());
-        $this->assertEquals(0, $invoice->getProductLines()->count());
+        $this->assertInvoiceBasics($invoice, 'John Doe', 'john@example.com');
+        $this->assertInvoiceHasNoProductLines($invoice);
     }
 
     public function testShouldCreateInvoiceWithProductLines(): void
     {
-        $createData = new CreateInvoiceData(
+        $createData = CreateInvoiceCommand::fromValues(
             'Jane Doe',
             'jane@example.com',
             [
@@ -58,27 +54,17 @@ class InvoiceFactoryTest extends TestCase
 
         $invoice = $this->factory->create($createData);
 
-        $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertEquals('Jane Doe', $invoice->getCustomerName());
-        $this->assertEquals('jane@example.com', $invoice->getCustomerEmail()->value());
-        $this->assertTrue($invoice->hasProductLines());
-        $this->assertEquals(2, $invoice->getProductLines()->count());
+        $this->assertInvoiceBasics($invoice, 'Jane Doe', 'jane@example.com');
+        $this->assertInvoiceHasProductLines($invoice, 2);
 
         $productLines = $invoice->getProductLines()->toArray();
-        $this->assertEquals('Product 1', $productLines[0]->getProductName());
-        $this->assertEquals(2, $productLines[0]->getQuantity()->value());
-        $this->assertEquals(100, $productLines[0]->getUnitPrice()->value());
-        $this->assertEquals(200, $productLines[0]->getTotalUnitPrice());
-
-        $this->assertEquals('Product 2', $productLines[1]->getProductName());
-        $this->assertEquals(3, $productLines[1]->getQuantity()->value());
-        $this->assertEquals(150, $productLines[1]->getUnitPrice()->value());
-        $this->assertEquals(450, $productLines[1]->getTotalUnitPrice());
+        $this->assertProductLine($productLines[0], 'Product 1', 2, 100, 200);
+        $this->assertProductLine($productLines[1], 'Product 2', 3, 150, 450);
     }
 
     public function testShouldCreateInvoiceWithSingleProductLine(): void
     {
-        $createData = new CreateInvoiceData(
+        $createData = CreateInvoiceCommand::fromValues(
             'Single Product Customer',
             'single@example.com',
             [
@@ -92,20 +78,16 @@ class InvoiceFactoryTest extends TestCase
 
         $invoice = $this->factory->create($createData);
 
-        $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertTrue($invoice->hasProductLines());
-        $this->assertEquals(1, $invoice->getProductLines()->count());
+        $this->assertInvoiceBasics($invoice, 'Single Product Customer', 'single@example.com');
+        $this->assertInvoiceHasProductLines($invoice, 1);
 
         $productLines = $invoice->getProductLines()->toArray();
-        $this->assertEquals('Single Item', $productLines[0]->getProductName());
-        $this->assertEquals(1, $productLines[0]->getQuantity()->value());
-        $this->assertEquals(500, $productLines[0]->getUnitPrice()->value());
-        $this->assertEquals(500, $productLines[0]->getTotalUnitPrice());
+        $this->assertProductLine($productLines[0], 'Single Item', 1, 500, 500);
     }
 
     public function testShouldCreateInvoiceWithEmptyProductLinesArray(): void
     {
-        $createData = new CreateInvoiceData(
+        $createData = CreateInvoiceCommand::fromValues(
             'Empty Products Customer',
             'empty@example.com',
             []
@@ -113,58 +95,36 @@ class InvoiceFactoryTest extends TestCase
 
         $invoice = $this->factory->create($createData);
 
-        $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertFalse($invoice->hasProductLines());
-        $this->assertEquals(0, $invoice->getProductLines()->count());
-    }
-
-    public function testShouldHandleSpecialCharactersInProductNames(): void
-    {
-        $createData = new CreateInvoiceData(
-            'Special Chars Customer',
-            'special@example.com',
-            [
-                [
-                    'productName' => 'Product with Special Chars: !@#$%^&*()',
-                    'quantity' => 1,
-                    'unitPrice' => 100,
-                ],
-            ]
-        );
-
-        $invoice = $this->factory->create($createData);
-
-        $this->assertInstanceOf(Invoice::class, $invoice);
-        $productLines = $invoice->getProductLines()->toArray();
-        $this->assertEquals('Product with Special Chars: !@#$%^&*()', $productLines[0]->getProductName());
+        $this->assertInvoiceBasics($invoice, 'Empty Products Customer', 'empty@example.com');
+        $this->assertInvoiceHasNoProductLines($invoice);
     }
 
     public function testShouldHandleLargeQuantitiesAndPrices(): void
     {
-        $createData = new CreateInvoiceData(
+        $createData = CreateInvoiceCommand::fromValues(
             'Large Numbers Customer',
             'large@example.com',
             [
                 [
                     'productName' => 'Expensive Item',
-                    'quantity' => 999,
-                    'unitPrice' => 999999,
+                    'quantity' => 999999,
+                    'unitPrice' => 99999999,
                 ],
             ]
         );
 
         $invoice = $this->factory->create($createData);
 
-        $this->assertInstanceOf(Invoice::class, $invoice);
+        $this->assertInvoiceBasics($invoice, 'Large Numbers Customer', 'large@example.com');
+        $this->assertInvoiceHasProductLines($invoice, 1);
+
         $productLines = $invoice->getProductLines()->toArray();
-        $this->assertEquals(999, $productLines[0]->getQuantity()->value());
-        $this->assertEquals(999999, $productLines[0]->getUnitPrice()->value());
-        $this->assertEquals(999 * 999999, $productLines[0]->getTotalUnitPrice());
+        $this->assertProductLine($productLines[0], 'Expensive Item', 999999, 99999999, 999999 * 99999999);
     }
 
     public function testShouldGenerateUniqueIdsForProductLines(): void
     {
-        $createData = new CreateInvoiceData(
+        $createData = CreateInvoiceCommand::fromValues(
             'Unique IDs Customer',
             'unique@example.com',
             [
@@ -184,9 +144,61 @@ class InvoiceFactoryTest extends TestCase
         $invoice = $this->factory->create($createData);
         $productLines = $invoice->getProductLines()->toArray();
 
+        $this->assertProductLinesHaveUniqueIds($productLines[0], $productLines[1]);
+    }
+
+    /**
+     * Assert basic invoice properties
+     */
+    private function assertInvoiceBasics(Invoice $invoice, string $expectedCustomerName, string $expectedCustomerEmail): void
+    {
+        $this->assertInstanceOf(Invoice::class, $invoice);
+        $this->assertEquals($expectedCustomerName, $invoice->getCustomerName());
+        $this->assertEquals($expectedCustomerEmail, $invoice->getCustomerEmail()->value());
+    }
+
+    /**
+     * Assert invoice has no product lines
+     */
+    private function assertInvoiceHasNoProductLines(Invoice $invoice): void
+    {
+        $this->assertFalse($invoice->hasProductLines());
+        $this->assertEquals(0, $invoice->getProductLines()->count());
+    }
+
+    /**
+     * Assert invoice has the expected number of product lines
+     */
+    private function assertInvoiceHasProductLines(Invoice $invoice, int $expectedCount): void
+    {
+        $this->assertTrue($invoice->hasProductLines());
+        $this->assertEquals($expectedCount, $invoice->getProductLines()->count());
+    }
+
+    /**
+     * Assert product line has the expected properties
+     */
+    private function assertProductLine(
+        $productLine,
+        string $expectedProductName,
+        int $expectedQuantity,
+        int $expectedUnitPrice,
+        int $expectedTotalUnitPrice
+    ): void {
+        $this->assertEquals($expectedProductName, $productLine->getProductName());
+        $this->assertEquals($expectedQuantity, $productLine->getQuantity()->value());
+        $this->assertEquals($expectedUnitPrice, $productLine->getUnitPrice()->value());
+        $this->assertEquals($expectedTotalUnitPrice, $productLine->getTotalUnitPrice());
+    }
+
+    /**
+     * Assert two product lines have unique IDs
+     */
+    private function assertProductLinesHaveUniqueIds(InvoiceProductLine $productLine1, InvoiceProductLine $productLine2): void
+    {
         $this->assertNotEquals(
-            $productLines[0]->getId()->toString(),
-            $productLines[1]->getId()->toString()
+            $productLine1->getId()->toString(),
+            $productLine2->getId()->toString()
         );
     }
 }

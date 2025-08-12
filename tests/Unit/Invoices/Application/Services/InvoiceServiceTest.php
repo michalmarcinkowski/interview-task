@@ -9,9 +9,9 @@ use Modules\Invoices\Application\Services\InvoiceService;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
-use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
 use Ramsey\Uuid\Uuid;
 use Mockery;
 use Modules\Invoices\Domain\Exceptions\InvoiceNotFoundException;
@@ -35,7 +35,7 @@ class InvoiceServiceTest extends TestCase
         $service = new InvoiceService($repository, $factory);
         $customerName = 'John Doe';
         $customerEmail = 'john@example.com';
-        $createData = new CreateInvoiceData($customerName, $customerEmail);
+        $createData = CreateInvoiceCommand::fromValues($customerName, $customerEmail);
         
         $invoice = $service->create($createData);
         

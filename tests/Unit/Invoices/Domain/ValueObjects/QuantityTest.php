@@ -47,4 +47,10 @@ class QuantityTest extends TestCase
 
         $this->assertFalse($quantity1->equals($quantity2));
     }
+
+    public function testShouldHandleLargeNumbers(): void
+    {
+        $largeQuantity = Quantity::fromInteger(999999999);
+        $this->assertEquals(999999999, $largeQuantity->value());
+    }
 }

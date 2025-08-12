@@ -7,8 +7,8 @@ namespace Modules\Invoices\Presentation\Http;
 use Illuminate\Routing\Controller;
 use Modules\Invoices\Application\Services\InvoiceService;
 use Modules\Invoices\Presentation\Http\Request\CreateInvoiceRequest;
-use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
 use Modules\Invoices\Presentation\Http\Data\InvoiceData;
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Ramsey\Uuid\Uuid;
 
 class InvoiceController extends Controller
@@ -19,8 +19,12 @@ class InvoiceController extends Controller
     
     public function create(CreateInvoiceRequest $request)
     {
-        $createInvoiceData = CreateInvoiceData::fromRequest($request);
-        $invoice = $this->invoiceService->create($createInvoiceData);
+        $createInvoiceCommand = CreateInvoiceCommand::fromValues(
+            $request->customerName,
+            $request->customerEmail,
+            $request->productLines ?? []
+        );
+        $invoice = $this->invoiceService->create($createInvoiceCommand);
         
         return InvoiceData::fromDomainModel($invoice);
     }

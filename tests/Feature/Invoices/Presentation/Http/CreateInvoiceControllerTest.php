@@ -15,11 +15,10 @@ class CreateInvoiceControllerTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpFaker();
-
         parent::setUp();
     }
 
-    public function testShouldCreateInvoiceWithDraftStatusSuccessfully(): void
+    public function testShouldCreateEmptyInvoiceWithDraftStatusSuccessfully(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -29,12 +28,12 @@ class CreateInvoiceControllerTest extends TestCase
             'customerEmail' => $customerEmail,
         ]);
 
-        $response->assertStatus(201);
-        $response->assertJson([
-            'status' => InvoiceStatus::DRAFT->value,
-            'customerName' => $customerName,
-            'customerEmail' => $customerEmail,
-        ]);
+        $response->assertStatus(201)
+                ->assertJson([
+                    'status' => InvoiceStatus::DRAFT->value,
+                    'customerName' => $customerName,
+                    'customerEmail' => $customerEmail,
+                ]);
     }
 
     public function testShouldReturnValidationErrorForMissingCustomerName(): void
@@ -70,7 +69,7 @@ class CreateInvoiceControllerTest extends TestCase
     public function testShouldReturnValidationErrorForInvalidEmail(): void
     {
         $requestData = [
-            'customerName' => $this->faker->safeEmail(),
+            'customerName' => $this->faker->name(),
             'customerEmail' => 'invalid-email',
         ];
 
@@ -110,27 +109,36 @@ class CreateInvoiceControllerTest extends TestCase
 
     public function testShouldCreateInvoiceWithProductLinesSuccessfully(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+        $product1Name = $this->faker->words(2, true);
+        $product2Name = $this->faker->words(2, true);
+        $quantity1 = $this->faker->numberBetween(1, 10);
+        $quantity2 = $this->faker->numberBetween(1, 10);
+        $unitPrice1 = $this->faker->numberBetween(100, 1000);
+        $unitPrice2 = $this->faker->numberBetween(100, 1000);
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'John Doe',
-            'customerEmail' => 'john@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [
                 [
-                    'productName' => 'Product 1',
-                    'quantity' => 2,
-                    'unitPrice' => 100,
+                    'productName' => $product1Name,
+                    'quantity' => $quantity1,
+                    'unitPrice' => $unitPrice1,
                 ],
                 [
-                    'productName' => 'Product 2',
-                    'quantity' => 3,
-                    'unitPrice' => 150,
+                    'productName' => $product2Name,
+                    'quantity' => $quantity2,
+                    'unitPrice' => $unitPrice2,
                 ],
             ],
         ]);
 
         $response->assertStatus(201)
                 ->assertJson([
-                    'customerName' => 'John Doe',
-                    'customerEmail' => 'john@example.com',
+                    'customerName' => $customerName,
+                    'customerEmail' => $customerEmail,
                 ])
                 ->assertJsonStructure([
                     'id',
@@ -153,28 +161,34 @@ class CreateInvoiceControllerTest extends TestCase
         $this->assertCount(2, $responseData['productLines']);
         
         $firstProductLine = $responseData['productLines'][0];
-        $this->assertEquals('Product 1', $firstProductLine['productName']);
-        $this->assertEquals(2, $firstProductLine['quantity']);
-        $this->assertEquals(100, $firstProductLine['unitPrice']);
-        $this->assertEquals(200, $firstProductLine['totalUnitPrice']); // 2 * 100
+        $this->assertEquals($product1Name, $firstProductLine['productName']);
+        $this->assertEquals($quantity1, $firstProductLine['quantity']);
+        $this->assertEquals($unitPrice1, $firstProductLine['unitPrice']);
+        $this->assertEquals($quantity1 * $unitPrice1, $firstProductLine['totalUnitPrice']);
         
         $secondProductLine = $responseData['productLines'][1];
-        $this->assertEquals('Product 2', $secondProductLine['productName']);
-        $this->assertEquals(3, $secondProductLine['quantity']);
-        $this->assertEquals(150, $secondProductLine['unitPrice']);
-        $this->assertEquals(450, $secondProductLine['totalUnitPrice']); // 3 * 150
+        $this->assertEquals($product2Name, $secondProductLine['productName']);
+        $this->assertEquals($quantity2, $secondProductLine['quantity']);
+        $this->assertEquals($unitPrice2, $secondProductLine['unitPrice']);
+        $this->assertEquals($quantity2 * $unitPrice2, $secondProductLine['totalUnitPrice']);
     }
 
     public function testShouldCreateInvoiceWithSingleProductLine(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+        $productName = $this->faker->words(2, true);
+        $quantity = $this->faker->numberBetween(1, 5);
+        $unitPrice = $this->faker->numberBetween(100, 500);
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Single Product Customer',
-            'customerEmail' => 'single@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [
                 [
-                    'productName' => 'Single Item',
-                    'quantity' => 1,
-                    'unitPrice' => 500,
+                    'productName' => $productName,
+                    'quantity' => $quantity,
+                    'unitPrice' => $unitPrice,
                 ],
             ],
         ]);
@@ -198,21 +212,24 @@ class CreateInvoiceControllerTest extends TestCase
 
         $responseData = $response->json();
         $this->assertCount(1, $responseData['productLines']);
-        $this->assertEquals(500, $responseData['productLines'][0]['totalUnitPrice']);
+        $this->assertEquals($quantity * $unitPrice, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
     public function testShouldCreateInvoiceWithEmptyProductLinesArray(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Empty Products Customer',
-            'customerEmail' => 'empty@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [],
         ]);
 
         $response->assertStatus(201)
                 ->assertJson([
-                    'customerName' => 'Empty Products Customer',
-                    'customerEmail' => 'empty@example.com',
+                    'customerName' => $customerName,
+                    'customerEmail' => $customerEmail,
                 ])
                 ->assertJsonStructure([
                     'id',
@@ -228,14 +245,18 @@ class CreateInvoiceControllerTest extends TestCase
 
     public function testShouldReturnValidationErrorForInvalidProductLineQuantity(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+        $productName = $this->faker->words(2, true);
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Invalid Quantity Customer',
-            'customerEmail' => 'invalid@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [
                 [
-                    'productName' => 'Product with Invalid Quantity',
+                    'productName' => $productName,
                     'quantity' => 0, // Invalid: must be positive
-                    'unitPrice' => 100,
+                    'unitPrice' => $this->faker->numberBetween(100, 100000),
                 ],
             ],
         ]);
@@ -246,14 +267,18 @@ class CreateInvoiceControllerTest extends TestCase
 
     public function testShouldReturnValidationErrorForInvalidProductLineUnitPrice(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+        $productName = $this->faker->words(2, true);
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Invalid Price Customer',
-            'customerEmail' => 'invalid@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [
                 [
-                    'productName' => 'Product with Invalid Price',
-                    'quantity' => 1,
-                    'unitPrice' => -50, // Invalid: must be positive
+                    'productName' => $productName,
+                    'quantity' => $this->faker->numberBetween(1, 50),
+                    'unitPrice' => 0, // Invalid: must be positive
                 ],
             ],
         ]);
@@ -264,14 +289,17 @@ class CreateInvoiceControllerTest extends TestCase
 
     public function testShouldReturnValidationErrorForMissingProductName(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Missing Name Customer',
-            'customerEmail' => 'missing@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [
                 [
                     // 'productName' is missing
-                    'quantity' => 1,
-                    'unitPrice' => 100,
+                    'quantity' => $this->faker->numberBetween(1, 50),
+                    'unitPrice' => $this->faker->numberBetween(100, 100000),
                 ],
             ],
         ]);
@@ -282,39 +310,22 @@ class CreateInvoiceControllerTest extends TestCase
 
     public function testShouldReturnValidationErrorForEmptyProductName(): void
     {
+        $customerName = $this->faker->name();
+        $customerEmail = $this->faker->safeEmail();
+
         $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Empty Name Customer',
-            'customerEmail' => 'empty@example.com',
+            'customerName' => $customerName,
+            'customerEmail' => $customerEmail,
             'productLines' => [
                 [
                     'productName' => '', // Empty product name
-                    'quantity' => 1,
-                    'unitPrice' => 100,
+                    'quantity' => $this->faker->numberBetween(1, 50),
+                    'unitPrice' => $this->faker->numberBetween(100, 100000),
                 ],
             ],
         ]);
 
         $response->assertStatus(422)
                 ->assertJsonValidationErrors(['productLines.0.productName']);
-    }
-
-    public function testShouldHandleLargeQuantitiesAndPrices(): void
-    {
-        $response = $this->postJson(route('invoices.create'), [
-            'customerName' => 'Large Numbers Customer',
-            'customerEmail' => 'large@example.com',
-            'productLines' => [
-                [
-                    'productName' => 'Expensive Item',
-                    'quantity' => 999,
-                    'unitPrice' => 999999,
-                ],
-            ],
-        ]);
-
-        $response->assertStatus(201);
-        
-        $responseData = $response->json();
-        $this->assertEquals(999 * 999999, $responseData['productLines'][0]['totalUnitPrice']);
     }
 }

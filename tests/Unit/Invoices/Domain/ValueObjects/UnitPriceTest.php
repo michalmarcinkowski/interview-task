@@ -43,4 +43,10 @@ class UnitPriceTest extends TestCase
         $unitPrice2 = UnitPrice::fromInteger(200);
         $this->assertFalse($unitPrice1->equals($unitPrice2));
     }
+
+    public function testShouldHandleLargeNumbers(): void
+    {
+        $largeUnitPrice = UnitPrice::fromInteger(999999999);
+        $this->assertEquals(999999999, $largeUnitPrice->value());
+    }
 }
