@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\ValueObjects\Email;
+use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Ramsey\Uuid\UuidInterface;
 
 class InvoiceTest extends TestCase
@@ -16,8 +17,9 @@ class InvoiceTest extends TestCase
     {
         $customerName = 'John Doe';
         $customerEmail = Email::fromString('john@example.com');
+        $emptyProductLines = ProductLines::empty();
 
-        $invoice = Invoice::create($customerName, $customerEmail);
+        $invoice = Invoice::create($customerName, $customerEmail, $emptyProductLines);
 
         $this->assertInstanceOf(Invoice::class, $invoice);
         $this->assertInstanceOf(UuidInterface::class, $invoice->getId());

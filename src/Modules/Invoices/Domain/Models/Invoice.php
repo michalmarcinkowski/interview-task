@@ -6,26 +6,28 @@ namespace Modules\Invoices\Domain\Models;
 
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\ValueObjects\Email;
+use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-class Invoice
+final class Invoice
 {
     private function __construct(
         private UuidInterface $id,
         private InvoiceStatus $status,
         private string $customerName,
         private Email $customerEmail,
-        private array $productLines = []
+        private ProductLines $productLines
     ) { }
 
-    public static function create(string $customerName, Email $customerEmail): self
+    public static function create(string $customerName, Email $customerEmail, ProductLines $productLines): self
     {
         return new self(
             Uuid::uuid4(),
             InvoiceStatus::DRAFT,
             $customerName,
-            $customerEmail
+            $customerEmail,
+            $productLines,
         );
     }
 
@@ -34,7 +36,7 @@ class Invoice
         InvoiceStatus $status,
         string $customerName,
         Email $customerEmail,
-        array $productLines = []
+        ProductLines $productLines,
     ): self {
         return new self($id, $status, $customerName, $customerEmail, $productLines);
     }
@@ -59,8 +61,13 @@ class Invoice
         return $this->customerEmail;
     }
 
+    public function getProductLines(): ProductLines
+    {
+        return $this->productLines;
+    }
+
     public function hasProductLines(): bool
     {
-        return !empty($this->productLines);
+        return $this->productLines->isNotEmpty();
     }
 }

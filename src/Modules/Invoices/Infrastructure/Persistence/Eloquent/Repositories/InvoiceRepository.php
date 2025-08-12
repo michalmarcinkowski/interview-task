@@ -10,6 +10,7 @@ use Modules\Invoices\Infrastructure\Persistence\Eloquent\Models\InvoiceModel;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\Exceptions\InvoiceNotFoundException;
+use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Ramsey\Uuid\UuidInterface;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
@@ -26,7 +27,8 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             $id,
             InvoiceStatus::from($model->status),
             $model->customer_name,
-            Email::fromString($model->customer_email)
+            Email::fromString($model->customer_email),
+            ProductLines::empty(),
         );
     }
 

@@ -8,11 +8,14 @@ use Tests\TestCase;
 use Modules\Invoices\Application\Services\InvoiceService;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
+use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
 use Ramsey\Uuid\Uuid;
 use Mockery;
 use Modules\Invoices\Domain\Exceptions\InvoiceNotFoundException;
+use Modules\Invoices\Domain\ValueObjects\ProductLines;
 
 class InvoiceServiceTest extends TestCase
 {
@@ -23,17 +26,21 @@ class InvoiceServiceTest extends TestCase
                   ->once()
                   ->with(Mockery::type(Invoice::class));
         
-        $service = new InvoiceService($repository);
-        $customerName = 'John Doe';
-        $customerEmail = Email::fromString('john@example.com');
+        $factory = Mockery::mock(InvoiceFactoryInterface::class);
+        $expectedInvoice = Invoice::create('John Doe', Email::fromString('john@example.com'), ProductLines::empty());
+        $factory->shouldReceive('create')
+                ->once()
+                ->andReturn($expectedInvoice);
         
-        $invoice = $service->create($customerName, $customerEmail);
+        $service = new InvoiceService($repository, $factory);
+        $customerName = 'John Doe';
+        $customerEmail = 'john@example.com';
+        $createData = new CreateInvoiceData($customerName, $customerEmail);
+        
+        $invoice = $service->create($createData);
         
         $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertEquals($customerName, $invoice->getCustomerName());
-        $this->assertEquals($customerEmail, $invoice->getCustomerEmail());
-        $this->assertEquals(InvoiceStatus::DRAFT, $invoice->getStatus());
-        $this->assertTrue(Uuid::isValid($invoice->getId()->toString()));
+        $this->assertEquals($expectedInvoice, $invoice);
     }
     
     public function testShouldFindOrFailInvoiceSuccessfully(): void
@@ -42,12 +49,14 @@ class InvoiceServiceTest extends TestCase
         $status = InvoiceStatus::DRAFT;
         $customerName = 'Jane Doe';
         $customerEmail = Email::fromString('jane@example.com');
+        $productLines = ProductLines::empty();
         
         $expectedInvoice = Invoice::reconstitute(
             $invoiceId,
             $status,
             $customerName,
             $customerEmail,
+            $productLines,
         );
         
         $repository = Mockery::mock(InvoiceRepositoryInterface::class);
@@ -56,7 +65,9 @@ class InvoiceServiceTest extends TestCase
                   ->with($invoiceId)
                   ->andReturn($expectedInvoice);
         
-        $service = new InvoiceService($repository);
+        $factory = Mockery::mock(InvoiceFactoryInterface::class);
+        
+        $service = new InvoiceService($repository, $factory);
         
         $foundInvoice = $service->findOrFail($invoiceId);
         
@@ -77,7 +88,9 @@ class InvoiceServiceTest extends TestCase
                   ->with($invoiceId)
                   ->andThrow(InvoiceNotFoundException::withId($invoiceId));
         
-        $service = new InvoiceService($repository);
+        $factory = Mockery::mock(InvoiceFactoryInterface::class);
+        
+        $service = new InvoiceService($repository, $factory);
         
         $this->expectException(InvoiceNotFoundException::class);
         $this->expectExceptionMessage(sprintf('Invoice with ID "%s" was not found.', $invoiceId->toString()));

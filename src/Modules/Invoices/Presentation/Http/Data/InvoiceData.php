@@ -6,6 +6,7 @@ namespace Modules\Invoices\Presentation\Http\Data;
 
 use Spatie\LaravelData\Data;
 use Modules\Invoices\Domain\Models\Invoice;
+use Modules\Invoices\Domain\Models\InvoiceProductLine;
 
 final class InvoiceData extends Data
 {
@@ -14,15 +15,27 @@ final class InvoiceData extends Data
         public readonly string $status,
         public readonly string $customerName,
         public readonly string $customerEmail,
+        public readonly array $productLines = []
     ) {}
 
     public static function fromDomainModel(Invoice $invoice): self
     {
+        $productLines = array_map(function (InvoiceProductLine $line) {
+            return [
+                'id' => $line->getId()->toString(),
+                'productName' => $line->getProductName(),
+                'quantity' => $line->getQuantity()->value(),
+                'unitPrice' => $line->getUnitPrice()->value(),
+                'totalUnitPrice' => $line->getTotalUnitPrice(),
+            ];
+        }, $invoice->getProductLines()->toArray());
+
         return new self(
             id: $invoice->getId()->toString(),
             status: $invoice->getStatus()->value,
             customerName: $invoice->getCustomerName(),
             customerEmail: $invoice->getCustomerEmail()->value(),
+            productLines: $productLines
         );
     }
 }

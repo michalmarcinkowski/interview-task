@@ -6,12 +6,15 @@ namespace Modules\Invoices\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
+use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
 use Modules\Invoices\Infrastructure\Persistence\Eloquent\Repositories\InvoiceRepository;
+use Modules\Invoices\Application\Factories\InvoiceFactory;
 
 class InvoiceServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+        $this->app->bind(InvoiceFactoryInterface::class, InvoiceFactory::class);
     }
 }

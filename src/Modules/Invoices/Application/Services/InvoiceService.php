@@ -6,18 +6,21 @@ namespace Modules\Invoices\Application\Services;
 
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
-use Modules\Invoices\Domain\ValueObjects\Email;
+use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
+use Modules\Invoices\Presentation\Http\Data\CreateInvoiceData;
 use Ramsey\Uuid\UuidInterface;
 
 class InvoiceService
 {
     public function __construct(
-        private InvoiceRepositoryInterface $repository
+        private InvoiceRepositoryInterface $repository,
+        private InvoiceFactoryInterface $factory
     ) {}
     
-    public function create(string $customerName, Email $customerEmail): Invoice
+    public function create(CreateInvoiceData $data): Invoice
     {
-        $invoice = Invoice::create($customerName, $customerEmail);
+        $invoice = $this->factory->create($data);
+        
         $this->repository->save($invoice);
 
         return $invoice;
