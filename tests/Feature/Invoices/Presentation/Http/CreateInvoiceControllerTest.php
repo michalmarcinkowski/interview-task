@@ -6,12 +6,11 @@ namespace Tests\Feature\Invoices\Presentation\Http;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 
 class CreateInvoiceControllerTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use WithFaker;
 
     protected function setUp(): void
     {
