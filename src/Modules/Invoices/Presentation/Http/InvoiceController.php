@@ -6,8 +6,10 @@ namespace Modules\Invoices\Presentation\Http;
 
 use Illuminate\Routing\Controller;
 use Modules\Invoices\Application\Services\InvoiceService;
+use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Presentation\Http\Request\CreateInvoiceRequest;
 use Modules\Invoices\Presentation\Http\Data\InvoiceData;
+use Ramsey\Uuid\Uuid;
 
 class InvoiceController extends Controller
 {
@@ -19,9 +21,15 @@ class InvoiceController extends Controller
     {
         $invoice = $this->invoiceService->create(
             $request->customerName,
-            $request->customerEmail
+            Email::fromString($request->customerEmail),
         );
         
+        return InvoiceData::fromDomainModel($invoice);
+    }
+    
+    public function view(string $id)
+    {
+        $invoice = $this->invoiceService->findOrFail(Uuid::fromString($id));
         return InvoiceData::fromDomainModel($invoice);
     }
 }
