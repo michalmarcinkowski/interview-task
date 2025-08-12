@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
+use Modules\Invoices\Domain\Exceptions\NotFoundException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,5 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (NotFoundException $e, $request) {
+            if ($request->expectsJson()) {
+                return new JsonResponse([
+                    'error' => 'Not found',
+                    'message' => $e->getMessage(),
+                ], 404);
+            }
+        });
     })->create();
