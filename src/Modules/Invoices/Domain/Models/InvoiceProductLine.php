@@ -47,8 +47,8 @@ final class InvoiceProductLine
 
     public static function create(string $productName, Quantity $quantity, UnitPrice $unitPrice): self
     {
-        Assert::stringNotEmpty($productName, 'Product name must not be empty.');
-
+        Assert::notEmpty(trim($productName), 'Product name must not be empty or only whitespace');
+        
         return new self(
             Uuid::uuid4(),
             $productName,
