@@ -71,10 +71,15 @@ class SendInvoiceControllerTest extends TestCase
         $response = $this->postJson(route('invoices.send', $invoiceId));
 
         // Then I should get an error response
-        $response->assertStatus(400)
-            ->assertJson([
-                'message' => 'Invoice cannot be sent. Make sure it fulfills the business rules.',
-            ]);
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+        $response->assertJsonStructure([
+            'error',
+            'message'
+        ]);
+        
+        $message = $response->json('message');
+        $this->assertStringContainsString('Cannot mark invoice', $message);
+        $this->assertStringContainsString('Invoice must have at least one product line', $message);
     }
 
     public function testShouldReturn404ForNonExistentInvoice(): void
