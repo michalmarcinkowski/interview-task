@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Invoices\Application\Services;
 
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
+use Modules\Invoices\Application\Commands\SendInvoiceCommand;
 use Modules\Invoices\Domain\Models\Invoice;
 use Ramsey\Uuid\UuidInterface;
 
@@ -58,4 +59,17 @@ interface InvoiceServiceInterface
      * @throws InvoiceNotFoundException When invoice is not found
      */
     public function findOrFail(UuidInterface $id): Invoice;
+
+    /**
+     * Sends an invoice to the customer.
+     *
+     * This method orchestrates the invoice sending process.
+     *
+     * @param  SendInvoiceCommand  $command  The send invoice command
+     * @return Invoice The updated invoice with SENDING status
+     *
+     * @throws InvoiceNotFoundException When invoice is not found
+     * @throws \InvalidArgumentException When invoice cannot be sent
+     */
+    public function send(SendInvoiceCommand $command): Invoice;
 }

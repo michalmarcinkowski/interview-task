@@ -66,6 +66,64 @@ class InvoiceTest extends TestCase
         $this->assertEquals(125, $invoice->getTotal());
     }
 
+    public function testShouldCalculateTotalForReconstitutedInvoice(): void
+    {
+        $invoiceId = Uuid::uuid4();
+        $status = InvoiceStatus::DRAFT;
+        $customerName = 'Reconstituted Customer';
+        $customerEmail = Email::fromString('recon@example.com');
+        $productLines = ProductLines::fromArray([
+            InvoiceProductLine::create('Product A', Quantity::fromInteger(3), UnitPrice::fromInteger(100)),
+            InvoiceProductLine::create('Product B', Quantity::fromInteger(2), UnitPrice::fromInteger(50))
+        ]);
+
+        $invoice = Invoice::reconstitute(
+            $invoiceId,
+            $status,
+            $customerName,
+            $customerEmail,
+            $productLines
+        );
+
+        $this->assertEquals(400, $invoice->getTotal());
+    }
+
+    public function testShouldNotAllowSendingInvoiceWithEmptyProductLines(): void
+    {
+        $invoice = Invoice::create(
+            'Empty Customer',
+            Email::fromString('empty@example.com'),
+            ProductLines::empty()
+        );
+
+        $this->assertFalse($invoice->canBeSent());
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invoice cannot be sent. Make sure it fulfills the business rules.');
+        
+        $invoice->markAsSending();
+    }
+
+    public function testShouldNotAllowSendingInvoiceInNonDraftStatus(): void
+    {
+        $invoice = Invoice::create(
+            'Status Customer',
+            Email::fromString('status@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product', Quantity::fromInteger(1), UnitPrice::fromInteger(100))
+            ])
+        );
+
+        // First send the invoice to change status to SENDING
+        $invoice->markAsSending();
+        
+        // Try to send again - should fail
+        $this->assertFalse($invoice->canBeSent());
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invoice cannot be sent. Make sure it fulfills the business rules.');
+        
+        $invoice->markAsSending();
+    }
+
     //
     // Data Providers
 

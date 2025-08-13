@@ -9,6 +9,7 @@ use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Webmozart\Assert\Assert;
 
 /**
  * Invoice Aggregate Root
@@ -213,5 +214,46 @@ final class Invoice
     public function getTotal(): int
     {
         return array_sum(array_map(fn (InvoiceProductLine $line) => $line->getTotalUnitPrice(), $this->productLines->toArray()));
+    }
+
+    /**
+     * Checks if the invoice can be sent.
+     *
+     * Business Rules:
+     * - Invoice must be in DRAFT status
+     * - Invoice must have at least one product line
+     * - All product lines must have positive quantity and unit price (already enforced in ProductLine)
+     *
+     * @return bool True if the invoice can be sent
+     */
+    public function canBeSent(): bool
+    {
+        if ($this->status !== InvoiceStatus::DRAFT) {
+            return false;
+        }
+
+        if (! $this->hasProductLines()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Marks the invoice as sending.
+     *
+     * This method validates the status transition and changes the invoice status
+     * from DRAFT to SENDING.
+     *
+     * @throws \InvalidArgumentException When invoice cannot be sent
+     */
+    public function markAsSending(): void
+    {
+        Assert::true(
+            $this->canBeSent(),
+            'Invoice cannot be sent. Make sure it fulfills the business rules.'
+        );
+
+        $this->status = InvoiceStatus::SENDING;
     }
 }
