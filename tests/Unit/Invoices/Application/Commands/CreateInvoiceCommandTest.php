@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Invoices\Application\Commands;
 
-use PHPUnit\Framework\TestCase;
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
+use PHPUnit\Framework\TestCase;
 use Webmozart\Assert\InvalidArgumentException;
 
 class CreateInvoiceCommandTest extends TestCase
 {
-    public function testShouldCreateCommandWithValidData(): void
+    public function test_should_create_command_with_valid_data(): void
     {
         $command = CreateInvoiceCommand::fromValues(
             'John Doe',
@@ -32,7 +32,7 @@ class CreateInvoiceCommandTest extends TestCase
         $this->assertEquals(100, $command->productLines[0]['unitPrice']);
     }
 
-    public function testShouldCreateCommandWithoutProductLines(): void
+    public function test_should_create_command_without_product_lines(): void
     {
         $command = CreateInvoiceCommand::fromValues(
             'Jane Doe',
@@ -44,7 +44,7 @@ class CreateInvoiceCommandTest extends TestCase
         $this->assertEmpty($command->productLines);
     }
 
-    public function testShouldCreateCommandWithMultipleProductLines(): void
+    public function test_should_create_command_with_multiple_product_lines(): void
     {
         $command = CreateInvoiceCommand::fromValues(
             'Multiple Products Customer',
@@ -68,7 +68,7 @@ class CreateInvoiceCommandTest extends TestCase
         $this->assertEquals('Product 2', $command->productLines[1]['productName']);
     }
 
-    public function testShouldThrowExceptionForEmptyCustomerName(): void
+    public function test_should_throw_exception_for_empty_customer_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Customer name cannot be empty.');
@@ -76,16 +76,16 @@ class CreateInvoiceCommandTest extends TestCase
         CreateInvoiceCommand::fromValues('', 'john@example.com');
     }
 
-    public function testShouldThrowExceptionForWhitespaceOnlyCustomerName(): void
+    public function test_should_throw_exception_for_whitespace_only_customer_name(): void
     {
         // Assert::notEmpty() only checks for empty strings, not whitespace-only strings
         // So this should actually pass without throwing an exception
         $command = CreateInvoiceCommand::fromValues('   ', 'john@example.com');
-        
+
         $this->assertEquals('   ', $command->customerName);
     }
 
-    public function testShouldThrowExceptionForInvalidEmail(): void
+    public function test_should_throw_exception_for_invalid_email(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Customer email is not a valid email address.');
@@ -93,7 +93,7 @@ class CreateInvoiceCommandTest extends TestCase
         CreateInvoiceCommand::fromValues('John Doe', 'invalid-email');
     }
 
-    public function testShouldThrowExceptionForMissingProductNameKey(): void
+    public function test_should_throw_exception_for_missing_product_name_key(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Product line at index 0 is missing productName.');
@@ -110,7 +110,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForMissingQuantityKey(): void
+    public function test_should_throw_exception_for_missing_quantity_key(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Product line at index 0 is missing quantity.');
@@ -127,7 +127,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForMissingUnitPriceKey(): void
+    public function test_should_throw_exception_for_missing_unit_price_key(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Product line at index 0 is missing unitPrice.');
@@ -144,7 +144,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForNonStringProductName(): void
+    public function test_should_throw_exception_for_non_string_product_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Product name at index 0 must be a string.');
@@ -162,7 +162,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForEmptyProductName(): void
+    public function test_should_throw_exception_for_empty_product_name(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Product name at index 0 cannot be empty.');
@@ -180,7 +180,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForWhitespaceOnlyProductName(): void
+    public function test_should_throw_exception_for_whitespace_only_product_name(): void
     {
         // Assert::notEmpty() only checks for empty strings, not whitespace-only strings
         // So this should actually pass without throwing an exception
@@ -195,11 +195,11 @@ class CreateInvoiceCommandTest extends TestCase
                 ],
             ]
         );
-        
+
         $this->assertEquals('   ', $command->productLines[0]['productName']);
     }
 
-    public function testShouldThrowExceptionForNonIntegerQuantity(): void
+    public function test_should_throw_exception_for_non_integer_quantity(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quantity at index 0 must be a positive integer.');
@@ -217,7 +217,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForZeroQuantity(): void
+    public function test_should_throw_exception_for_zero_quantity(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quantity at index 0 must be a positive integer.');
@@ -235,7 +235,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForNegativeQuantity(): void
+    public function test_should_throw_exception_for_negative_quantity(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quantity at index 0 must be a positive integer.');
@@ -253,7 +253,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForNonIntegerUnitPrice(): void
+    public function test_should_throw_exception_for_non_integer_unit_price(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unit price at index 0 must be a positive integer.');
@@ -271,7 +271,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForZeroUnitPrice(): void
+    public function test_should_throw_exception_for_zero_unit_price(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unit price at index 0 must be a positive integer.');
@@ -289,7 +289,7 @@ class CreateInvoiceCommandTest extends TestCase
         );
     }
 
-    public function testShouldThrowExceptionForNegativeUnitPrice(): void
+    public function test_should_throw_exception_for_negative_unit_price(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unit price at index 0 must be a positive integer.');

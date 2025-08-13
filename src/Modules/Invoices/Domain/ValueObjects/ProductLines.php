@@ -9,7 +9,7 @@ use Modules\Invoices\Domain\Models\InvoiceProductLine;
 final readonly class ProductLines
 {
     /**
-     * @param InvoiceProductLine[] $productLines
+     * @param  InvoiceProductLine[]  $productLines
      */
     private function __construct(
         private array $productLines
@@ -18,7 +18,7 @@ final readonly class ProductLines
     public static function fromArray(array $productLines): self
     {
         foreach ($productLines as $productLine) {
-            if (!$productLine instanceof InvoiceProductLine) {
+            if (! $productLine instanceof InvoiceProductLine) {
                 throw new \InvalidArgumentException('All productLines must be InvoiceProductLine instances');
             }
         }
@@ -51,7 +51,7 @@ final readonly class ProductLines
 
     public function isNotEmpty(): bool
     {
-        return !empty($this->productLines);
+        return ! empty($this->productLines);
     }
 
     public function equals(ProductLines $other): bool
@@ -61,7 +61,7 @@ final readonly class ProductLines
         }
 
         foreach ($this->productLines as $index => $item) {
-            if (!$item->equals($other->productLines[$index])) {
+            if (! $item->equals($other->productLines[$index])) {
                 return false;
             }
         }

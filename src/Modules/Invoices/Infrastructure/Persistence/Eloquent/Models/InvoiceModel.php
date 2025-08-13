@@ -12,6 +12,7 @@ class InvoiceModel extends Model
     protected $table = 'invoices';
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [

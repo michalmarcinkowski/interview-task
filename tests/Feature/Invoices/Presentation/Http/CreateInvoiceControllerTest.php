@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Invoices\Presentation\Http;
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Tests\TestCase;
 
 class CreateInvoiceControllerTest extends TestCase
 {
@@ -18,7 +18,7 @@ class CreateInvoiceControllerTest extends TestCase
         parent::setUp();
     }
 
-    public function testShouldCreateEmptyInvoiceWithDraftStatusSuccessfully(): void
+    public function test_should_create_empty_invoice_with_draft_status_successfully(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -29,14 +29,14 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'status' => InvoiceStatus::DRAFT->value,
-                    'customerName' => $customerName,
-                    'customerEmail' => $customerEmail,
-                ]);
+            ->assertJson([
+                'status' => InvoiceStatus::DRAFT->value,
+                'customerName' => $customerName,
+                'customerEmail' => $customerEmail,
+            ]);
     }
 
-    public function testShouldReturnValidationErrorForMissingCustomerName(): void
+    public function test_should_return_validation_error_for_missing_customer_name(): void
     {
         $requestData = [
             // 'customerName' is intentionally missing
@@ -46,12 +46,12 @@ class CreateInvoiceControllerTest extends TestCase
         $response = $this->postJson(route('invoices.create'), $requestData);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors([
-                     'customerName' => 'The customer name field is required.'
-                 ]);
+            ->assertJsonValidationErrors([
+                'customerName' => 'The customer name field is required.',
+            ]);
     }
 
-    public function testShouldReturnValidationErrorForMissingCustomerEmail(): void
+    public function test_should_return_validation_error_for_missing_customer_email(): void
     {
         $requestData = [
             'customerName' => $this->faker->name(),
@@ -61,12 +61,12 @@ class CreateInvoiceControllerTest extends TestCase
         $response = $this->postJson(route('invoices.create'), $requestData);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors([
-                    'customerEmail' => 'The customer email field is required.'
-                ]);
+            ->assertJsonValidationErrors([
+                'customerEmail' => 'The customer email field is required.',
+            ]);
     }
 
-    public function testShouldReturnValidationErrorForInvalidEmail(): void
+    public function test_should_return_validation_error_for_invalid_email(): void
     {
         $requestData = [
             'customerName' => $this->faker->name(),
@@ -76,12 +76,12 @@ class CreateInvoiceControllerTest extends TestCase
         $response = $this->postJson(route('invoices.create'), $requestData);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors([
-                    'customerEmail' => 'The customer email field must be a valid email address.'
-                ]);
+            ->assertJsonValidationErrors([
+                'customerEmail' => 'The customer email field must be a valid email address.',
+            ]);
     }
 
-    public function testShouldReturnValidationErrorForEmptyCustomerName(): void
+    public function test_should_return_validation_error_for_empty_customer_name(): void
     {
         $requestData = [
             'customerName' => '',
@@ -91,10 +91,10 @@ class CreateInvoiceControllerTest extends TestCase
         $response = $this->postJson(route('invoices.create'), $requestData);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['customerName']);
+            ->assertJsonValidationErrors(['customerName']);
     }
 
-    public function testShouldReturnValidationErrorForEmptyCustomerEmail(): void
+    public function test_should_return_validation_error_for_empty_customer_email(): void
     {
         $requestData = [
             'customerName' => $this->faker->name(),
@@ -104,10 +104,10 @@ class CreateInvoiceControllerTest extends TestCase
         $response = $this->postJson(route('invoices.create'), $requestData);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['customerEmail']);
+            ->assertJsonValidationErrors(['customerEmail']);
     }
 
-    public function testShouldCreateInvoiceWithProductLinesSuccessfully(): void
+    public function test_should_create_invoice_with_product_lines_successfully(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -136,36 +136,36 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'customerName' => $customerName,
-                    'customerEmail' => $customerEmail,
-                ])
-                ->assertJsonStructure([
-                    'id',
-                    'status',
-                    'customerName',
-                    'customerEmail',
-                    'productLines' => [
-                        '*' => [
-                            'id',
-                            'productName',
-                            'quantity',
-                            'unitPrice',
-                            'totalUnitPrice',
-                        ],
+            ->assertJson([
+                'customerName' => $customerName,
+                'customerEmail' => $customerEmail,
+            ])
+            ->assertJsonStructure([
+                'id',
+                'status',
+                'customerName',
+                'customerEmail',
+                'productLines' => [
+                    '*' => [
+                        'id',
+                        'productName',
+                        'quantity',
+                        'unitPrice',
+                        'totalUnitPrice',
                     ],
-                ]);
+                ],
+            ]);
 
         // Verify product lines data
         $responseData = $response->json();
         $this->assertCount(2, $responseData['productLines']);
-        
+
         $firstProductLine = $responseData['productLines'][0];
         $this->assertEquals($product1Name, $firstProductLine['productName']);
         $this->assertEquals($quantity1, $firstProductLine['quantity']);
         $this->assertEquals($unitPrice1, $firstProductLine['unitPrice']);
         $this->assertEquals($quantity1 * $unitPrice1, $firstProductLine['totalUnitPrice']);
-        
+
         $secondProductLine = $responseData['productLines'][1];
         $this->assertEquals($product2Name, $secondProductLine['productName']);
         $this->assertEquals($quantity2, $secondProductLine['quantity']);
@@ -173,7 +173,7 @@ class CreateInvoiceControllerTest extends TestCase
         $this->assertEquals($quantity2 * $unitPrice2, $secondProductLine['totalUnitPrice']);
     }
 
-    public function testShouldCreateInvoiceWithSingleProductLine(): void
+    public function test_should_create_invoice_with_single_product_line(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -194,28 +194,28 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'id',
-                    'status',
-                    'customerName',
-                    'customerEmail',
-                    'productLines' => [
-                        '*' => [
-                            'id',
-                            'productName',
-                            'quantity',
-                            'unitPrice',
-                            'totalUnitPrice',
-                        ],
+            ->assertJsonStructure([
+                'id',
+                'status',
+                'customerName',
+                'customerEmail',
+                'productLines' => [
+                    '*' => [
+                        'id',
+                        'productName',
+                        'quantity',
+                        'unitPrice',
+                        'totalUnitPrice',
                     ],
-                ]);
+                ],
+            ]);
 
         $responseData = $response->json();
         $this->assertCount(1, $responseData['productLines']);
         $this->assertEquals($quantity * $unitPrice, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
-    public function testShouldCreateInvoiceWithEmptyProductLinesArray(): void
+    public function test_should_create_invoice_with_empty_product_lines_array(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -227,23 +227,23 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'customerName' => $customerName,
-                    'customerEmail' => $customerEmail,
-                ])
-                ->assertJsonStructure([
-                    'id',
-                    'status',
-                    'customerName',
-                    'customerEmail',
-                    'productLines',
-                ]);
+            ->assertJson([
+                'customerName' => $customerName,
+                'customerEmail' => $customerEmail,
+            ])
+            ->assertJsonStructure([
+                'id',
+                'status',
+                'customerName',
+                'customerEmail',
+                'productLines',
+            ]);
 
         $responseData = $response->json();
         $this->assertCount(0, $responseData['productLines']);
     }
 
-    public function testShouldReturnValidationErrorForInvalidProductLineQuantity(): void
+    public function test_should_return_validation_error_for_invalid_product_line_quantity(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -262,10 +262,10 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['productLines.0.quantity']);
+            ->assertJsonValidationErrors(['productLines.0.quantity']);
     }
 
-    public function testShouldReturnValidationErrorForInvalidProductLineUnitPrice(): void
+    public function test_should_return_validation_error_for_invalid_product_line_unit_price(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -284,10 +284,10 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['productLines.0.unitPrice']);
+            ->assertJsonValidationErrors(['productLines.0.unitPrice']);
     }
 
-    public function testShouldReturnValidationErrorForMissingProductName(): void
+    public function test_should_return_validation_error_for_missing_product_name(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -305,10 +305,10 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['productLines.0.productName']);
+            ->assertJsonValidationErrors(['productLines.0.productName']);
     }
 
-    public function testShouldReturnValidationErrorForEmptyProductName(): void
+    public function test_should_return_validation_error_for_empty_product_name(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -326,6 +326,6 @@ class CreateInvoiceControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['productLines.0.productName']);
+            ->assertJsonValidationErrors(['productLines.0.productName']);
     }
 }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Invoices\Application\Factories;
 
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Modules\Invoices\Domain\Models\Invoice;
+use Modules\Invoices\Domain\Models\InvoiceProductLine;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\ValueObjects\ProductLines;
-use Modules\Invoices\Domain\Models\InvoiceProductLine;
 use Modules\Invoices\Domain\ValueObjects\Quantity;
 use Modules\Invoices\Domain\ValueObjects\UnitPrice;
-use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 
 final class InvoiceFactory implements InvoiceFactoryInterface
 {
@@ -26,9 +26,9 @@ final class InvoiceFactory implements InvoiceFactoryInterface
     }
 
     /**
-     * @param array<array{productName: string, quantity: int, unitPrice: int}> $productLinesData
-     * 
+     * @param  array<array{productName: string, quantity: int, unitPrice: int}>  $productLinesData
      * @return InvoiceProductLine[]
+     *
      * @throws InvalidArgumentException
      */
     private function createProductLines(array $productLinesData): array

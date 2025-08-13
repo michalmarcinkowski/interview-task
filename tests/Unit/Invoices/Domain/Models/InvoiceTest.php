@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Invoices\Domain\Models;
 
-use PHPUnit\Framework\TestCase;
-use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\ValueObjects\ProductLines;
+use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\UuidInterface;
 
 class InvoiceTest extends TestCase
 {
-    public function testShouldCreateInvoiceInDraftStatusWithoutProductLines(): void
+    public function test_should_create_invoice_in_draft_status_without_product_lines(): void
     {
         $customerName = 'John Doe';
         $customerEmail = Email::fromString('john@example.com');

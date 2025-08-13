@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Invoices\Application\Factories;
 
-use PHPUnit\Framework\TestCase;
+use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Modules\Invoices\Application\Factories\InvoiceFactory;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Models\InvoiceProductLine;
-use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
+use PHPUnit\Framework\TestCase;
 
 class InvoiceFactoryTest extends TestCase
 {
@@ -17,10 +17,10 @@ class InvoiceFactoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->factory = new InvoiceFactory();
+        $this->factory = new InvoiceFactory;
     }
 
-    public function testShouldCreateInvoiceWithoutProductLines(): void
+    public function test_should_create_invoice_without_product_lines(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'John Doe',
@@ -33,7 +33,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertInvoiceHasNoProductLines($invoice);
     }
 
-    public function testShouldCreateInvoiceWithProductLines(): void
+    public function test_should_create_invoice_with_product_lines(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Jane Doe',
@@ -62,7 +62,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertProductLine($productLines[1], 'Product 2', 3, 150, 450);
     }
 
-    public function testShouldCreateInvoiceWithSingleProductLine(): void
+    public function test_should_create_invoice_with_single_product_line(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Single Product Customer',
@@ -85,7 +85,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertProductLine($productLines[0], 'Single Item', 1, 500, 500);
     }
 
-    public function testShouldCreateInvoiceWithEmptyProductLinesArray(): void
+    public function test_should_create_invoice_with_empty_product_lines_array(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Empty Products Customer',
@@ -99,7 +99,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertInvoiceHasNoProductLines($invoice);
     }
 
-    public function testShouldHandleLargeQuantitiesAndPrices(): void
+    public function test_should_handle_large_quantities_and_prices(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Large Numbers Customer',
@@ -122,7 +122,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertProductLine($productLines[0], 'Expensive Item', 999999, 99999999, 999999 * 99999999);
     }
 
-    public function testShouldGenerateUniqueIdsForProductLines(): void
+    public function test_should_generate_unique_ids_for_product_lines(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Unique IDs Customer',

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Invoices\Domain\ValueObjects;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Modules\Invoices\Domain\ValueObjects\Email;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 use Webmozart\Assert\InvalidArgumentException;
 
 class EmailTest extends TestCase
 {
     #[DataProvider('validEmailsProvider')]
-    public function testFromStringWithValidEmails(string $validEmail): void
+    public function test_from_string_with_valid_emails(string $validEmail): void
     {
         $email = Email::fromString($validEmail);
 
@@ -21,15 +21,15 @@ class EmailTest extends TestCase
     }
 
     #[DataProvider('invalidEmailsProvider')]
-    public function testFromStringWithInvalidEmails(string $invalidEmail): void
+    public function test_from_string_with_invalid_emails(string $invalidEmail): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected a value to be a valid e-mail address. Got: "' . $invalidEmail . '"');
+        $this->expectExceptionMessage('Expected a value to be a valid e-mail address. Got: "'.$invalidEmail.'"');
 
         Email::fromString($invalidEmail);
     }
 
-    public function testValueAndToStringMethods(): void
+    public function test_value_and_to_string_methods(): void
     {
         $email = Email::fromString('test@example.com');
 
@@ -38,7 +38,7 @@ class EmailTest extends TestCase
     }
 
     #[DataProvider('equalsProvider')]
-    public function testEquals(string $email1, string $email2, bool $expectedResult): void
+    public function test_equals(string $email1, string $email2, bool $expectedResult): void
     {
         $firstEmail = Email::fromString($email1);
         $secondEmail = Email::fromString($email2);
@@ -48,7 +48,7 @@ class EmailTest extends TestCase
     }
 
     #[DataProvider('normalizationProvider')]
-    public function testNormalization(string $inputEmail, string $expectedNormalizedEmail): void
+    public function test_normalization(string $inputEmail, string $expectedNormalizedEmail): void
     {
         $email = Email::fromString($inputEmail);
 

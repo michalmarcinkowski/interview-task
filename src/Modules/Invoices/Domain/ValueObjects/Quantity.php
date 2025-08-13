@@ -15,6 +15,7 @@ final readonly class Quantity
     public static function fromInteger(int $value): self
     {
         Assert::positiveInteger($value, 'Quantity must be a positive integer.');
+
         return new self($value);
     }
 

@@ -18,7 +18,7 @@ final class Invoice
         private string $customerName,
         private Email $customerEmail,
         private ProductLines $productLines
-    ) { }
+    ) {}
 
     public static function create(string $customerName, Email $customerEmail, ProductLines $productLines): self
     {

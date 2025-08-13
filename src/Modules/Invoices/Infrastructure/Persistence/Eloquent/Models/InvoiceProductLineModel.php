@@ -12,6 +12,7 @@ class InvoiceProductLineModel extends Model
     protected $table = 'invoice_product_lines';
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [

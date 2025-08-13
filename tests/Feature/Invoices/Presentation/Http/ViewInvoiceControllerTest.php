@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Invoices\Presentation\Http;
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Modules\Invoices\Domain\Enums\InvoiceStatus;
-use Modules\Invoices\Application\Services\InvoiceService;
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
+use Modules\Invoices\Application\Services\InvoiceService;
+use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\Models\Invoice;
 use Ramsey\Uuid\Uuid;
+use Tests\TestCase;
 
 class ViewInvoiceControllerTest extends TestCase
 {
@@ -22,22 +22,22 @@ class ViewInvoiceControllerTest extends TestCase
     {
         $this->setUpFaker();
         parent::setUp();
-        
+
         $this->invoiceService = app(InvoiceService::class);
     }
 
-    public function testShouldViewInvoiceSuccessfully(): void
+    public function test_should_view_invoice_successfully(): void
     {
         // Given I have an invoice
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
-        
+
         $invoice = $this->createInvoice($customerName, $customerEmail);
         $invoiceId = $invoice->getId()->toString();
-        
+
         // When I fetch the created invoice
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
-        
+
         // Then I should see the invoice details
         $viewResponse->assertStatus(200);
         $viewResponse->assertJson([
@@ -48,48 +48,48 @@ class ViewInvoiceControllerTest extends TestCase
         ]);
     }
 
-    public function testShouldReturn404ForNonExistentInvoice(): void
+    public function test_should_return404_for_non_existent_invoice(): void
     {
         $nonExistentId = Uuid::uuid4()->toString();
-        
+
         $response = $this->getJson(route('invoices.view', $nonExistentId));
-        
+
         $response->assertStatus(404)
-                ->assertJson([
-                    'error' => 'Not found',
-                    'message' => 'Invoice with ID "' . $nonExistentId . '" was not found.',
-                ])
-                ->assertJsonStructure([
-                    'error',
-                    'message'
-                ]);
+            ->assertJson([
+                'error' => 'Not found',
+                'message' => 'Invoice with ID "'.$nonExistentId.'" was not found.',
+            ])
+            ->assertJsonStructure([
+                'error',
+                'message',
+            ]);
     }
 
-    public function testShouldReturn404ForInvalidUuidFormat(): void
+    public function test_should_return404_for_invalid_uuid_format(): void
     {
         $invalidId = 'invalid-uuid-format';
-        
+
         $response = $this->getJson(route('invoices.view', $invalidId));
-        
+
         $response->assertStatus(404);
     }
 
-    public function testShouldReturn404ForUrlWithoutId(): void
+    public function test_should_return404_for_url_without_id(): void
     {
         $response = $this->getJson('/invoices/');
-        
+
         $response->assertStatus(404);
     }
 
-    public function testShouldHandleMultipleInvoiceRetrievals(): void
+    public function test_should_handle_multiple_invoice_retrievals(): void
     {
         // Given I have multiple invoices
         $invoices = $this->createMultipleInvoices(3);
-        
+
         // Verify each invoice can be retrieved
         foreach ($invoices as $invoice) {
             $viewResponse = $this->getJson(route('invoices.view', $invoice->getId()->toString()));
-            
+
             $viewResponse->assertStatus(200);
             $viewResponse->assertJson([
                 'id' => $invoice->getId()->toString(),
@@ -99,7 +99,7 @@ class ViewInvoiceControllerTest extends TestCase
         }
     }
 
-    public function testShouldViewInvoiceWithProductLinesSuccessfully(): void
+    public function test_should_view_invoice_with_product_lines_successfully(): void
     {
         // Given I have an invoice with product lines
         $invoice = $this->createInvoice(
@@ -119,43 +119,43 @@ class ViewInvoiceControllerTest extends TestCase
             ]
         );
         $invoiceId = $invoice->getId()->toString();
-        
+
         // When I fetch this invoice
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
-        
+
         // Then I should see the invoice details with product lines
         $viewResponse->assertStatus(200)
-                ->assertJson([
-                    'id' => $invoiceId,
-                    'customerName' => 'John Doe',
-                    'customerEmail' => 'john@example.com',
-                ])
-                ->assertJsonStructure([
-                    'id',
-                    'status',
-                    'customerName',
-                    'customerEmail',
-                    'productLines' => [
-                        '*' => [
-                            'id',
-                            'productName',
-                            'quantity',
-                            'unitPrice',
-                            'totalUnitPrice',
-                        ],
+            ->assertJson([
+                'id' => $invoiceId,
+                'customerName' => 'John Doe',
+                'customerEmail' => 'john@example.com',
+            ])
+            ->assertJsonStructure([
+                'id',
+                'status',
+                'customerName',
+                'customerEmail',
+                'productLines' => [
+                    '*' => [
+                        'id',
+                        'productName',
+                        'quantity',
+                        'unitPrice',
+                        'totalUnitPrice',
                     ],
-                ]);
+                ],
+            ]);
 
         // Verify product lines data
         $responseData = $viewResponse->json();
         $this->assertCount(2, $responseData['productLines']);
-        
+
         $firstProductLine = $responseData['productLines'][0];
         $this->assertEquals('Product 1', $firstProductLine['productName']);
         $this->assertEquals(2, $firstProductLine['quantity']);
         $this->assertEquals(100, $firstProductLine['unitPrice']);
         $this->assertEquals(200, $firstProductLine['totalUnitPrice']); // 2 * 100
-        
+
         $secondProductLine = $responseData['productLines'][1];
         $this->assertEquals('Product 2', $secondProductLine['productName']);
         $this->assertEquals(3, $secondProductLine['quantity']);
@@ -163,7 +163,7 @@ class ViewInvoiceControllerTest extends TestCase
         $this->assertEquals(450, $secondProductLine['totalUnitPrice']); // 3 * 150
     }
 
-    public function testShouldViewInvoiceWithSingleProductLine(): void
+    public function test_should_view_invoice_with_single_product_line(): void
     {
         $invoice = $this->createInvoice(
             'Single Product Customer',
@@ -177,18 +177,18 @@ class ViewInvoiceControllerTest extends TestCase
             ]
         );
         $invoiceId = $invoice->getId()->toString();
-        
+
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
-        
+
         $viewResponse->assertStatus(200);
-        
+
         $responseData = $viewResponse->json();
         $this->assertCount(1, $responseData['productLines']);
         $this->assertEquals('Single Item', $responseData['productLines'][0]['productName']);
         $this->assertEquals(500, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
-    public function testShouldViewInvoiceWithEmptyProductLines(): void
+    public function test_should_view_invoice_with_empty_product_lines(): void
     {
         $invoice = $this->createInvoice(
             'Empty Products Customer',
@@ -196,16 +196,16 @@ class ViewInvoiceControllerTest extends TestCase
             []
         );
         $invoiceId = $invoice->getId()->toString();
-        
+
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
-        
+
         $viewResponse->assertStatus(200);
-        
+
         $responseData = $viewResponse->json();
         $this->assertCount(0, $responseData['productLines']);
     }
 
-    public function testShouldViewInvoiceWithLargeQuantitiesAndPrices(): void
+    public function test_should_view_invoice_with_large_quantities_and_prices(): void
     {
         $invoice = $this->createInvoice(
             'Large Numbers Customer',
@@ -219,9 +219,9 @@ class ViewInvoiceControllerTest extends TestCase
             ]
         );
         $invoiceId = $invoice->getId()->toString();
-        
+
         $viewResponse = $this->getJson(route('invoices.view', $invoiceId));
-        
+
         $viewResponse->assertStatus(200);
         $responseData = $viewResponse->json();
         $this->assertEquals(999 * 999999, $responseData['productLines'][0]['totalUnitPrice']);
@@ -236,6 +236,7 @@ class ViewInvoiceControllerTest extends TestCase
                 $this->faker->safeEmail(),
             );
         }
+
         return $invoices;
     }
 
@@ -245,6 +246,7 @@ class ViewInvoiceControllerTest extends TestCase
     private function createInvoice(string $customerName, string $customerEmail, array $productLines = []): Invoice
     {
         $createInvoiceData = CreateInvoiceCommand::fromValues($customerName, $customerEmail, $productLines);
+
         return $this->invoiceService->create($createInvoiceData);
     }
 }

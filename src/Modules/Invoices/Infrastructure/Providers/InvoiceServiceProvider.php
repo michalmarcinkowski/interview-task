@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Modules\Invoices\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
-use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
-use Modules\Invoices\Infrastructure\Persistence\Eloquent\Repositories\InvoiceRepository;
 use Modules\Invoices\Application\Factories\InvoiceFactory;
+use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
+use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
+use Modules\Invoices\Infrastructure\Persistence\Eloquent\Repositories\InvoiceRepository;
 
 class InvoiceServiceProvider extends ServiceProvider
 {

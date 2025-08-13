@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Invoices\Presentation\Http\Data;
 
-use Spatie\LaravelData\Data;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Models\InvoiceProductLine;
+use Spatie\LaravelData\Data;
 
 final class InvoiceData extends Data
 {

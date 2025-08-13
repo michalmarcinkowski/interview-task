@@ -15,6 +15,7 @@ final readonly class UnitPrice
     public static function fromInteger(int $value): self
     {
         Assert::positiveInteger($value, 'Unit price must be a positive integer.');
+
         return new self($value);
     }
 
