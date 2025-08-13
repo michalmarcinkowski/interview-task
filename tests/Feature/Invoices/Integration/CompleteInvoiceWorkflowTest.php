@@ -117,9 +117,14 @@ final class CompleteInvoiceWorkflowTest extends TestCase
     {
         $response = $this->postJson("/api/invoices/{$invoiceId}/send");
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
-        $response->assertJson([
-            'message' => 'Invoice cannot be sent. Make sure it fulfills the business rules.',
+        $response->assertJsonStructure([
+            'error',
+            'message'
         ]);
+        
+        $message = $response->json('message');
+        $this->assertStringContainsString('Cannot mark invoice', $message);
+        $this->assertStringContainsString('Invoice must have at least one product line', $message);
     }
 
     private function assertInvoiceStatus(string $invoiceId, string $expectedStatus): void

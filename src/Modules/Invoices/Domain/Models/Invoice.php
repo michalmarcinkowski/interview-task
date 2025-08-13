@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Modules\Invoices\Domain\Models;
 
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Modules\Invoices\Domain\Exceptions\InvalidInvoiceStatusTransitionException;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use Webmozart\Assert\Assert;
 
 /**
  * Invoice Aggregate Root
@@ -245,14 +245,16 @@ final class Invoice
      * This method validates the status transition and changes the invoice status
      * from DRAFT to SENDING.
      *
-     * @throws \InvalidArgumentException When invoice cannot be sent
+     * @throws InvalidInvoiceStatusTransitionException When invoice cannot be sent
      */
     public function markAsSending(): void
     {
-        Assert::true(
-            $this->canBeSent(),
-            'Invoice cannot be sent. Make sure it fulfills the business rules.'
-        );
+        if (! $this->canBeSent()) {
+            throw InvalidInvoiceStatusTransitionException::cannotMarkAsSending(
+                $this->getId(),
+                $this->getStatus()
+            );
+        }
 
         $this->status = InvoiceStatus::SENDING;
     }
@@ -263,14 +265,16 @@ final class Invoice
      * This method validates the status transition and changes the invoice status
      * from SENDING to SENT_TO_CLIENT.
      *
-     * @throws \InvalidArgumentException When invoice cannot be marked as sent to client
+     * @throws InvalidInvoiceStatusTransitionException When invoice cannot be marked as sent to client
      */
     public function markAsSentToClient(): void
     {
-        Assert::true(
-            $this->canBeMarkedAsSentToClient(),
-            'Invoice cannot be marked as sent to client.'
-        );
+        if (! $this->canBeMarkedAsSentToClient()) {
+            throw InvalidInvoiceStatusTransitionException::cannotMarkAsSentToClient(
+                $this->getId(),
+                $this->getStatus()
+            );
+        }
 
         $this->status = InvoiceStatus::SENT_TO_CLIENT;
     }

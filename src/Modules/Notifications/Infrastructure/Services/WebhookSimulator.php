@@ -25,7 +25,7 @@ final readonly class WebhookSimulator implements WebhookSimulatorInterface
             $this->dispatcher->dispatch(new ResourceDeliveredEvent(
                 resourceId: Uuid::fromString($reference),
             ));
-            
+
             return true;
         } catch (\Exception $e) {
             // In a real scenario, this would be logged

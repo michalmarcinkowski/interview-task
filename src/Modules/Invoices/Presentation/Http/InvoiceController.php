@@ -10,6 +10,7 @@ use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Modules\Invoices\Application\Commands\SendInvoiceCommand;
 use Modules\Invoices\Application\Services\InvoiceServiceInterface;
 use Modules\Invoices\Application\Services\SendInvoiceHandlerInterface;
+use Modules\Invoices\Domain\Exceptions\InvalidInvoiceStatusTransitionException;
 use Modules\Invoices\Presentation\Http\Data\InvoiceData;
 use Modules\Invoices\Presentation\Http\Request\CreateInvoiceRequest;
 use Ramsey\Uuid\Uuid;
@@ -47,7 +48,7 @@ class InvoiceController extends Controller
             $this->sendInvoiceHandler->handle($sendInvoiceCommand);
 
             return response()->json(['message' => 'Invoice sending process initiated successfully'], Response::HTTP_ACCEPTED);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidInvoiceStatusTransitionException $e) {
             return response()->json([
                 'error' => 'Bad request',
                 'message' => $e->getMessage(),
