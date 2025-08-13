@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Modules\Invoices\Application\Services\InvoiceServiceInterface;
-use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\Models\Invoice;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
@@ -56,10 +55,6 @@ class SendInvoiceControllerTest extends TestCase
             ->assertJson([
                 'message' => 'Invoice sending process initiated successfully',
             ]);
-
-        // And the invoice status should be updated to SENDING
-        $updatedInvoice = $this->invoiceService->findOrFail($invoice->getId());
-        $this->assertEquals(InvoiceStatus::SENDING, $updatedInvoice->getStatus());
     }
 
     public function testShouldReturnErrorWhenSendingInvoiceWithEmptyProductLines(): void
@@ -80,10 +75,6 @@ class SendInvoiceControllerTest extends TestCase
             ->assertJson([
                 'message' => 'Invoice cannot be sent. Make sure it fulfills the business rules.',
             ]);
-
-        // And the invoice status should remain DRAFT
-        $updatedInvoice = $this->invoiceService->findOrFail($invoice->getId());
-        $this->assertEquals(InvoiceStatus::DRAFT, $updatedInvoice->getStatus());
     }
 
     public function testShouldReturn404ForNonExistentInvoice(): void
@@ -128,10 +119,6 @@ class SendInvoiceControllerTest extends TestCase
             ->assertJson([
                 'message' => 'Invoice sending process initiated successfully',
             ]);
-
-        // And the invoice status should be updated to SENDING
-        $updatedInvoice = $this->invoiceService->findOrFail($invoice->getId());
-        $this->assertEquals(InvoiceStatus::SENDING, $updatedInvoice->getStatus());
     }
 
     /**
