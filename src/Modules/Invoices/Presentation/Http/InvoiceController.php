@@ -42,9 +42,16 @@ class InvoiceController extends Controller
 
     public function send(string $id)
     {
-        $sendInvoiceCommand = new SendInvoiceCommand(Uuid::fromString($id));
-        $this->sendInvoiceHandler->handle($sendInvoiceCommand);
+        try {
+            $sendInvoiceCommand = new SendInvoiceCommand(Uuid::fromString($id));
+            $this->sendInvoiceHandler->handle($sendInvoiceCommand);
 
-        return response()->json(['message' => 'Invoice sending process initiated successfully'], Response::HTTP_ACCEPTED);
+            return response()->json(['message' => 'Invoice sending process initiated successfully'], Response::HTTP_ACCEPTED);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'error' => 'Bad request',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 }

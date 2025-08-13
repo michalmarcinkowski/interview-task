@@ -106,22 +106,117 @@ class InvoiceTest extends TestCase
     public function testShouldNotAllowSendingInvoiceInNonDraftStatus(): void
     {
         $invoice = Invoice::create(
-            'Status Customer',
-            Email::fromString('status@example.com'),
+            'John Doe',
+            Email::fromString('john@example.com'),
             ProductLines::fromArray([
-                InvoiceProductLine::create('Product', Quantity::fromInteger(1), UnitPrice::fromInteger(100))
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
             ])
         );
 
-        // First send the invoice to change status to SENDING
         $invoice->markAsSending();
-        
-        // Try to send again - should fail
-        $this->assertFalse($invoice->canBeSent());
+        $this->assertEquals(InvoiceStatus::SENDING, $invoice->getStatus());
+
+        // Try to send again - should fail because it's already in SENDING status
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invoice cannot be sent. Make sure it fulfills the business rules.');
-        
+
         $invoice->markAsSending();
+    }
+
+    public function testShouldAllowMarkingInvoiceAsSentToClientWhenInSendingStatus(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        $invoice->markAsSending();
+        $this->assertEquals(InvoiceStatus::SENDING, $invoice->getStatus());
+
+        $invoice->markAsSentToClient();
+        $this->assertEquals(InvoiceStatus::SENT_TO_CLIENT, $invoice->getStatus());
+    }
+
+    public function testShouldNotAllowMarkingInvoiceAsSentToClientWhenNotInSendingStatus(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invoice cannot be marked as sent to client.');
+
+        $invoice->markAsSentToClient();
+    }
+
+    public function testShouldNotAllowMarkingInvoiceAsSentToClientWhenAlreadySent(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        $invoice->markAsSending();
+        $invoice->markAsSentToClient();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invoice cannot be marked as sent to client.');
+
+        $invoice->markAsSentToClient();
+    }
+
+    public function testShouldCorrectlyIdentifyInvoiceAsSentToClient(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        // Initially should not be sent to client
+        $this->assertFalse($invoice->isSentToClientAlready());
+
+        // After marking as sending, should still not be sent to client
+        $invoice->markAsSending();
+        $this->assertFalse($invoice->isSentToClientAlready());
+
+        // After marking as sent to client, should return true
+        $invoice->markAsSentToClient();
+        $this->assertTrue($invoice->isSentToClientAlready());
+    }
+
+    public function testShouldCorrectlyIdentifyIfInvoiceCanBeMarkedAsSentToClient(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        // Initially in DRAFT status, cannot be marked as sent to client
+        $this->assertFalse($invoice->canBeMarkedAsSentToClient());
+
+        // After marking as sending, can be marked as sent to client
+        $invoice->markAsSending();
+        $this->assertTrue($invoice->canBeMarkedAsSentToClient());
+
+        // After marking as sent to client, cannot be marked as sent to client again
+        $invoice->markAsSentToClient();
+        $this->assertFalse($invoice->canBeMarkedAsSentToClient());
     }
 
     //

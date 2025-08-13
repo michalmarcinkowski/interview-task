@@ -256,4 +256,48 @@ final class Invoice
 
         $this->status = InvoiceStatus::SENDING;
     }
+
+    /**
+     * Marks the invoice as sent to client.
+     *
+     * This method validates the status transition and changes the invoice status
+     * from SENDING to SENT_TO_CLIENT.
+     *
+     * @throws \InvalidArgumentException When invoice cannot be marked as sent to client
+     */
+    public function markAsSentToClient(): void
+    {
+        Assert::true(
+            $this->canBeMarkedAsSentToClient(),
+            'Invoice cannot be marked as sent to client.'
+        );
+
+        $this->status = InvoiceStatus::SENT_TO_CLIENT;
+    }
+
+    /**
+     * Checks if the invoice is already marked as sent to client.
+     *
+     * This method provides a semantic way to check if the invoice
+     * has already been delivered to the client.
+     *
+     * @return bool True if the invoice is in SENT_TO_CLIENT status
+     */
+    public function isSentToClientAlready(): bool
+    {
+        return $this->status === InvoiceStatus::SENT_TO_CLIENT;
+    }
+
+    /**
+     * Checks if the invoice can be marked as sent to client.
+     *
+     * This method validates the business rule that an invoice must be
+     * in SENDING status to be marked as sent to client.
+     *
+     * @return bool True if the invoice can be marked as sent to client
+     */
+    public function canBeMarkedAsSentToClient(): bool
+    {
+        return $this->status === InvoiceStatus::SENDING;
+    }
 }

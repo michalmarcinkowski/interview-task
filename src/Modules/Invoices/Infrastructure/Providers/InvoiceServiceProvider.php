@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Invoices\Infrastructure\Providers;
 
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Modules\Invoices\Application\Factories\InvoiceFactory;
 use Modules\Invoices\Application\Factories\InvoiceFactoryInterface;
+use Modules\Invoices\Application\Listeners\InvoiceDeliveredListener;
 use Modules\Invoices\Application\Services\InvoiceService;
 use Modules\Invoices\Application\Services\InvoiceServiceInterface;
 use Modules\Invoices\Application\Services\NotificationServiceInterface;
@@ -15,6 +17,7 @@ use Modules\Invoices\Application\Services\SendInvoiceHandlerInterface;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Invoices\Infrastructure\Persistence\Eloquent\Repositories\InvoiceRepository;
 use Modules\Invoices\Infrastructure\Services\NotificationService;
+use Modules\Notifications\Api\Events\ResourceDeliveredEvent;
 
 class InvoiceServiceProvider extends ServiceProvider
 {
@@ -25,5 +28,15 @@ class InvoiceServiceProvider extends ServiceProvider
         $this->app->bind(InvoiceServiceInterface::class, InvoiceService::class);
         $this->app->bind(SendInvoiceHandlerInterface::class, SendInvoiceHandler::class);
         $this->app->bind(NotificationServiceInterface::class, NotificationService::class);
+    }
+
+    public function boot(): void
+    {
+        $dispatcher = $this->app->make(Dispatcher::class);
+
+        $dispatcher->listen(
+            ResourceDeliveredEvent::class,
+            InvoiceDeliveredListener::class
+        );
     }
 }
