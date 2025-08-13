@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Invoices\Domain\Models;
 
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Modules\Invoices\Domain\Models\InvoiceProductLine;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Ramsey\Uuid\Uuid;
@@ -255,5 +256,23 @@ final class Invoice
         );
 
         $this->status = InvoiceStatus::SENDING;
+    }
+
+    /**
+     * Marks the invoice as sent to client.
+     *
+     * This method validates the status transition and changes the invoice status
+     * from SENDING to SENT_TO_CLIENT.
+     *
+     * @throws \InvalidArgumentException When invoice cannot be marked as sent to client
+     */
+    public function markAsSentToClient(): void
+    {
+        Assert::true(
+            $this->status === InvoiceStatus::SENDING,
+            'Invoice must be in SENDING status to be marked as sent to client.'
+        );
+
+        $this->status = InvoiceStatus::SENT_TO_CLIENT;
     }
 }
