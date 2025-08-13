@@ -16,11 +16,14 @@ final readonly class NotificationFacade implements NotificationFacadeInterface
 
     public function notify(NotifyData $data): void
     {
-        $this->driver->send(
+        $result = $this->driver->send(
             toEmail: $data->toEmail,
             subject: $data->subject,
             message: $data->message,
             reference: $data->resourceId->toString(),
         );
+
+        if ($result) {
+        }
     }
 }

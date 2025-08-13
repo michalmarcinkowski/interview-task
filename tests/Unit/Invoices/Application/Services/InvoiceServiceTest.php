@@ -45,19 +45,11 @@ class InvoiceServiceTest extends TestCase
 
     public function testShouldFindOrFailInvoiceSuccessfully(): void
     {
-        $invoiceId = Uuid::uuid4();
-        $status = InvoiceStatus::DRAFT;
         $customerName = 'Jane Doe';
         $customerEmail = Email::fromString('jane@example.com');
-        $productLines = ProductLines::empty();
 
-        $expectedInvoice = Invoice::reconstitute(
-            $invoiceId,
-            $status,
-            $customerName,
-            $customerEmail,
-            $productLines,
-        );
+        $expectedInvoice = Invoice::create($customerName, $customerEmail, ProductLines::empty());
+        $invoiceId = $expectedInvoice->getId();
 
         $repository = Mockery::mock(InvoiceRepositoryInterface::class);
         $repository->shouldReceive('findOrFail')
@@ -72,10 +64,10 @@ class InvoiceServiceTest extends TestCase
         $foundInvoice = $service->findOrFail($invoiceId);
 
         $this->assertInstanceOf(Invoice::class, $foundInvoice);
-        $this->assertEquals($invoiceId, $foundInvoice->getId());
+        $this->assertEquals($expectedInvoice->getId(), $foundInvoice->getId());
         $this->assertEquals($customerName, $foundInvoice->getCustomerName());
         $this->assertEquals($customerEmail, $foundInvoice->getCustomerEmail());
-        $this->assertEquals($status, $foundInvoice->getStatus());
+        $this->assertEquals(InvoiceStatus::DRAFT, $foundInvoice->getStatus());
     }
 
     public function testShouldThrowExceptionWhenInvoiceNotFound(): void
