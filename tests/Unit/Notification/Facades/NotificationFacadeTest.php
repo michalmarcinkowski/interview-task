@@ -29,7 +29,7 @@ final class NotificationFacadeTest extends TestCase
         );
     }
 
-    public function test_delivered(): void
+    public function testDelivered(): void
     {
         $data = new NotifyData(
             resourceId: Str::uuid(),

@@ -42,12 +42,6 @@ use Webmozart\Assert\Assert;
  * - **Alternative Considered**: Custom validation logic
  * - **Rejection Reason**: More maintenance, less standardized
  *
- * ### 6. Array Structure for Product Lines
- * - **Why**: Simple array structure for easy serialization/deserialization
- * - **Benefit**: Works well with HTTP requests and JSON
- * - **Alternative Considered**: Collection of ProductLine objects
- * - **Rejection Reason**: Would require additional mapping in controllers
- *
  * ## Architecture Context
  *
  * This command is part of the Application layer and follows the Command pattern

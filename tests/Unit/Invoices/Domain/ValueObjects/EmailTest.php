@@ -12,7 +12,7 @@ use Webmozart\Assert\InvalidArgumentException;
 class EmailTest extends TestCase
 {
     #[DataProvider('validEmailsProvider')]
-    public function test_from_string_with_valid_emails(string $validEmail): void
+    public function testFromStringWithValidEmails(string $validEmail): void
     {
         $email = Email::fromString($validEmail);
 
@@ -21,7 +21,7 @@ class EmailTest extends TestCase
     }
 
     #[DataProvider('invalidEmailsProvider')]
-    public function test_from_string_with_invalid_emails(string $invalidEmail): void
+    public function testFromStringWithInvalidEmails(string $invalidEmail): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected a value to be a valid e-mail address. Got: "'.$invalidEmail.'"');
@@ -29,7 +29,7 @@ class EmailTest extends TestCase
         Email::fromString($invalidEmail);
     }
 
-    public function test_value_and_to_string_methods(): void
+    public function testValueAndToStringMethods(): void
     {
         $email = Email::fromString('test@example.com');
 
@@ -38,7 +38,7 @@ class EmailTest extends TestCase
     }
 
     #[DataProvider('equalsProvider')]
-    public function test_equals(string $email1, string $email2, bool $expectedResult): void
+    public function testEquals(string $email1, string $email2, bool $expectedResult): void
     {
         $firstEmail = Email::fromString($email1);
         $secondEmail = Email::fromString($email2);
@@ -48,7 +48,7 @@ class EmailTest extends TestCase
     }
 
     #[DataProvider('normalizationProvider')]
-    public function test_normalization(string $inputEmail, string $expectedNormalizedEmail): void
+    public function testNormalization(string $inputEmail, string $expectedNormalizedEmail): void
     {
         $email = Email::fromString($inputEmail);
 

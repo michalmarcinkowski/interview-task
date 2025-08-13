@@ -14,7 +14,7 @@ use Webmozart\Assert\InvalidArgumentException;
 
 class InvoiceProductLineTest extends TestCase
 {
-    public function test_should_create_invoice_product_line_with_valid_data(): void
+    public function testShouldCreateInvoiceProductLineWithValidData(): void
     {
         $productLine = InvoiceProductLine::create(
             'Test Product',
@@ -25,7 +25,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertProductLineBasics($productLine, 'Test Product', 2, 100, 200);
     }
 
-    public function test_should_reconstitute_invoice_product_line_with_existing_id(): void
+    public function testShouldReconstituteInvoiceProductLineWithExistingId(): void
     {
         $id = Uuid::uuid4();
         $productLine = InvoiceProductLine::reconstitute(
@@ -39,7 +39,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertEquals($id, $productLine->getId());
     }
 
-    public function test_should_calculate_total_unit_price_correctly(): void
+    public function testShouldCalculateTotalUnitPriceCorrectly(): void
     {
         $productLine = InvoiceProductLine::create(
             'Test Product',
@@ -50,7 +50,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertEquals(375, $productLine->getTotalUnitPrice()); // 5 * 75
     }
 
-    public function test_should_calculate_total_unit_price_with_large_numbers(): void
+    public function testShouldCalculateTotalUnitPriceWithLargeNumbers(): void
     {
         $productLine = InvoiceProductLine::create(
             'Expensive Product',
@@ -61,7 +61,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertEquals(99999899000001, $productLine->getTotalUnitPrice());
     }
 
-    public function test_should_calculate_total_unit_price_with_quantity_one(): void
+    public function testShouldCalculateTotalUnitPriceWithQuantityOne(): void
     {
         $productLine = InvoiceProductLine::create(
             'Single Item',
@@ -72,7 +72,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertEquals(250, $productLine->getTotalUnitPrice());
     }
 
-    public function test_should_throw_exception_for_empty_product_name(): void
+    public function testShouldThrowExceptionForEmptyProductName(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -83,7 +83,7 @@ class InvoiceProductLineTest extends TestCase
         );
     }
 
-    public function test_should_throw_exception_for_whitespace_only_product_name(): void
+    public function testShouldThrowExceptionForWhitespaceOnlyProductName(): void
     {
         $this->expectException(\Webmozart\Assert\InvalidArgumentException::class);
         $this->expectExceptionMessage('Product name must not be empty or only whitespace');
@@ -95,7 +95,7 @@ class InvoiceProductLineTest extends TestCase
         );
     }
 
-    public function test_should_handle_long_product_name(): void
+    public function testShouldHandleLongProductName(): void
     {
         $longName = str_repeat('A', 255); // Maximum reasonable length
         $productLine = InvoiceProductLine::create(
@@ -107,7 +107,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertEquals($longName, $productLine->getProductName());
     }
 
-    public function test_should_return_correct_value_objects(): void
+    public function testShouldReturnCorrectValueObjects(): void
     {
         $quantity = Quantity::fromInteger(4);
         $unitPrice = UnitPrice::fromInteger(125);
@@ -121,7 +121,7 @@ class InvoiceProductLineTest extends TestCase
         $this->assertValueObjectsAreCorrect($productLine, $quantity, $unitPrice);
     }
 
-    public function test_should_generate_unique_ids_for_different_instances(): void
+    public function testShouldGenerateUniqueIdsForDifferentInstances(): void
     {
         $productLine1 = InvoiceProductLine::create(
             'Product 1',

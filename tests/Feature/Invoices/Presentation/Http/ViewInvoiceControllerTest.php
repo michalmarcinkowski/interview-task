@@ -26,7 +26,7 @@ class ViewInvoiceControllerTest extends TestCase
         $this->invoiceService = app(InvoiceServiceInterface::class);
     }
 
-    public function test_should_view_invoice_successfully(): void
+    public function testShouldViewInvoiceSuccessfully(): void
     {
         // Given I have an invoice
         $customerName = $this->faker->name();
@@ -48,7 +48,7 @@ class ViewInvoiceControllerTest extends TestCase
         ]);
     }
 
-    public function test_should_return404_for_non_existent_invoice(): void
+    public function testShouldReturn404ForNonExistentInvoice(): void
     {
         $nonExistentId = Uuid::uuid4()->toString();
 
@@ -65,7 +65,7 @@ class ViewInvoiceControllerTest extends TestCase
             ]);
     }
 
-    public function test_should_return404_for_invalid_uuid_format(): void
+    public function testShouldReturn404ForInvalidUuidFormat(): void
     {
         $invalidId = 'invalid-uuid-format';
 
@@ -74,14 +74,14 @@ class ViewInvoiceControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_should_return404_for_url_without_id(): void
+    public function testShouldReturn404ForUrlWithoutId(): void
     {
         $response = $this->getJson('/invoices/');
 
         $response->assertStatus(404);
     }
 
-    public function test_should_handle_multiple_invoice_retrievals(): void
+    public function testShouldHandleMultipleInvoiceRetrievals(): void
     {
         // Given I have multiple invoices
         $invoices = $this->createMultipleInvoices(3);
@@ -99,7 +99,7 @@ class ViewInvoiceControllerTest extends TestCase
         }
     }
 
-    public function test_should_view_invoice_with_product_lines_successfully(): void
+    public function testShouldViewInvoiceWithProductLinesSuccessfully(): void
     {
         // Given I have an invoice with product lines
         $invoice = $this->createInvoice(
@@ -163,7 +163,7 @@ class ViewInvoiceControllerTest extends TestCase
         $this->assertEquals(450, $secondProductLine['totalUnitPrice']); // 3 * 150
     }
 
-    public function test_should_view_invoice_with_single_product_line(): void
+    public function testShouldViewInvoiceWithSingleProductLine(): void
     {
         $invoice = $this->createInvoice(
             'Single Product Customer',
@@ -188,7 +188,7 @@ class ViewInvoiceControllerTest extends TestCase
         $this->assertEquals(500, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
-    public function test_should_view_invoice_with_empty_product_lines(): void
+    public function testShouldViewInvoiceWithEmptyProductLines(): void
     {
         $invoice = $this->createInvoice(
             'Empty Products Customer',
@@ -205,7 +205,7 @@ class ViewInvoiceControllerTest extends TestCase
         $this->assertCount(0, $responseData['productLines']);
     }
 
-    public function test_should_view_invoice_with_large_quantities_and_prices(): void
+    public function testShouldViewInvoiceWithLargeQuantitiesAndPrices(): void
     {
         $invoice = $this->createInvoice(
             'Large Numbers Customer',

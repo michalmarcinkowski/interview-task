@@ -18,7 +18,7 @@ class CreateInvoiceControllerTest extends TestCase
         parent::setUp();
     }
 
-    public function test_should_create_empty_invoice_with_draft_status_successfully(): void
+    public function testShouldCreateEmptyInvoiceWithDraftStatusSuccessfully(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -36,7 +36,7 @@ class CreateInvoiceControllerTest extends TestCase
             ]);
     }
 
-    public function test_should_return_validation_error_for_missing_customer_name(): void
+    public function testShouldReturnValidationErrorForMissingCustomerName(): void
     {
         $requestData = [
             // 'customerName' is intentionally missing
@@ -51,7 +51,7 @@ class CreateInvoiceControllerTest extends TestCase
             ]);
     }
 
-    public function test_should_return_validation_error_for_missing_customer_email(): void
+    public function testShouldReturnValidationErrorForMissingCustomerEmail(): void
     {
         $requestData = [
             'customerName' => $this->faker->name(),
@@ -66,7 +66,7 @@ class CreateInvoiceControllerTest extends TestCase
             ]);
     }
 
-    public function test_should_return_validation_error_for_invalid_email(): void
+    public function testShouldReturnValidationErrorForInvalidEmail(): void
     {
         $requestData = [
             'customerName' => $this->faker->name(),
@@ -81,7 +81,7 @@ class CreateInvoiceControllerTest extends TestCase
             ]);
     }
 
-    public function test_should_return_validation_error_for_empty_customer_name(): void
+    public function testShouldReturnValidationErrorForEmptyCustomerName(): void
     {
         $requestData = [
             'customerName' => '',
@@ -94,7 +94,7 @@ class CreateInvoiceControllerTest extends TestCase
             ->assertJsonValidationErrors(['customerName']);
     }
 
-    public function test_should_return_validation_error_for_empty_customer_email(): void
+    public function testShouldReturnValidationErrorForEmptyCustomerEmail(): void
     {
         $requestData = [
             'customerName' => $this->faker->name(),
@@ -107,7 +107,7 @@ class CreateInvoiceControllerTest extends TestCase
             ->assertJsonValidationErrors(['customerEmail']);
     }
 
-    public function test_should_create_invoice_with_product_lines_successfully(): void
+    public function testShouldCreateInvoiceWithProductLinesSuccessfully(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -173,7 +173,7 @@ class CreateInvoiceControllerTest extends TestCase
         $this->assertEquals($quantity2 * $unitPrice2, $secondProductLine['totalUnitPrice']);
     }
 
-    public function test_should_create_invoice_with_single_product_line(): void
+    public function testShouldCreateInvoiceWithSingleProductLine(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -215,7 +215,7 @@ class CreateInvoiceControllerTest extends TestCase
         $this->assertEquals($quantity * $unitPrice, $responseData['productLines'][0]['totalUnitPrice']);
     }
 
-    public function test_should_create_invoice_with_empty_product_lines_array(): void
+    public function testShouldCreateInvoiceWithEmptyProductLinesArray(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -243,7 +243,7 @@ class CreateInvoiceControllerTest extends TestCase
         $this->assertCount(0, $responseData['productLines']);
     }
 
-    public function test_should_return_validation_error_for_invalid_product_line_quantity(): void
+    public function testShouldReturnValidationErrorForInvalidProductLineQuantity(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -265,7 +265,7 @@ class CreateInvoiceControllerTest extends TestCase
             ->assertJsonValidationErrors(['productLines.0.quantity']);
     }
 
-    public function test_should_return_validation_error_for_invalid_product_line_unit_price(): void
+    public function testShouldReturnValidationErrorForInvalidProductLineUnitPrice(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -287,7 +287,7 @@ class CreateInvoiceControllerTest extends TestCase
             ->assertJsonValidationErrors(['productLines.0.unitPrice']);
     }
 
-    public function test_should_return_validation_error_for_missing_product_name(): void
+    public function testShouldReturnValidationErrorForMissingProductName(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();
@@ -308,7 +308,7 @@ class CreateInvoiceControllerTest extends TestCase
             ->assertJsonValidationErrors(['productLines.0.productName']);
     }
 
-    public function test_should_return_validation_error_for_empty_product_name(): void
+    public function testShouldReturnValidationErrorForEmptyProductName(): void
     {
         $customerName = $this->faker->name();
         $customerEmail = $this->faker->safeEmail();

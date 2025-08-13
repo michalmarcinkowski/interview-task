@@ -20,7 +20,7 @@ class NotificationControllerTest extends TestCase
     }
 
     #[DataProvider('hookActionProvider')]
-    public function test_hook(string $action): void
+    public function testHook(string $action): void
     {
         $uri = route('notification.hook', [
             'action' => $action,
@@ -30,7 +30,7 @@ class NotificationControllerTest extends TestCase
         $this->getJson($uri)->assertOk();
     }
 
-    public function test_invalid(): void
+    public function testInvalid(): void
     {
         $params = [
             'action' => 'dummy',

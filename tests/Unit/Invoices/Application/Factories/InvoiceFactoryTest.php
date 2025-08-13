@@ -20,7 +20,7 @@ class InvoiceFactoryTest extends TestCase
         $this->factory = new InvoiceFactory;
     }
 
-    public function test_should_create_invoice_without_product_lines(): void
+    public function testShouldCreateInvoiceWithoutProductLines(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'John Doe',
@@ -33,7 +33,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertInvoiceHasNoProductLines($invoice);
     }
 
-    public function test_should_create_invoice_with_product_lines(): void
+    public function testShouldCreateInvoiceWithProductLines(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Jane Doe',
@@ -62,7 +62,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertProductLine($productLines[1], 'Product 2', 3, 150, 450);
     }
 
-    public function test_should_create_invoice_with_single_product_line(): void
+    public function testShouldCreateInvoiceWithSingleProductLine(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Single Product Customer',
@@ -85,7 +85,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertProductLine($productLines[0], 'Single Item', 1, 500, 500);
     }
 
-    public function test_should_create_invoice_with_empty_product_lines_array(): void
+    public function testShouldCreateInvoiceWithEmptyProductLinesArray(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Empty Products Customer',
@@ -99,7 +99,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertInvoiceHasNoProductLines($invoice);
     }
 
-    public function test_should_handle_large_quantities_and_prices(): void
+    public function testShouldHandleLargeQuantitiesAndPrices(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Large Numbers Customer',
@@ -122,7 +122,7 @@ class InvoiceFactoryTest extends TestCase
         $this->assertProductLine($productLines[0], 'Expensive Item', 999999, 99999999, 999999 * 99999999);
     }
 
-    public function test_should_generate_unique_ids_for_product_lines(): void
+    public function testShouldGenerateUniqueIdsForProductLines(): void
     {
         $createData = CreateInvoiceCommand::fromValues(
             'Unique IDs Customer',

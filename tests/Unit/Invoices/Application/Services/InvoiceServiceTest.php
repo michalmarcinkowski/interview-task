@@ -14,12 +14,12 @@ use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Invoices\Domain\ValueObjects\Email;
 use Modules\Invoices\Domain\ValueObjects\ProductLines;
+use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Tests\TestCase;
 
 class InvoiceServiceTest extends TestCase
 {
-    public function test_should_create_invoice_successfully(): void
+    public function testShouldCreateInvoiceSuccessfully(): void
     {
         $repository = Mockery::mock(InvoiceRepositoryInterface::class);
         $repository->shouldReceive('save')
@@ -43,7 +43,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals($expectedInvoice, $invoice);
     }
 
-    public function test_should_find_or_fail_invoice_successfully(): void
+    public function testShouldFindOrFailInvoiceSuccessfully(): void
     {
         $invoiceId = Uuid::uuid4();
         $status = InvoiceStatus::DRAFT;
@@ -78,7 +78,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals($status, $foundInvoice->getStatus());
     }
 
-    public function test_should_throw_exception_when_invoice_not_found(): void
+    public function testShouldThrowExceptionWhenInvoiceNotFound(): void
     {
         $invoiceId = Uuid::uuid4();
 

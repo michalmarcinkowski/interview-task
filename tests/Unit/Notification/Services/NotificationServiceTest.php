@@ -26,7 +26,7 @@ final class NotificationServiceTest extends TestCase
         $this->notificationService = new NotificationService($this->dispatcher);
     }
 
-    public function test_delivered(): void
+    public function testDelivered(): void
     {
         $this->dispatcher->expects($this->once())
             ->method('dispatch')

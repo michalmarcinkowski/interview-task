@@ -15,7 +15,8 @@ final class InvoiceData extends Data
         public readonly string $status,
         public readonly string $customerName,
         public readonly string $customerEmail,
-        public readonly array $productLines = []
+        public readonly array $productLines,
+        public readonly int $total,
     ) {}
 
     public static function fromDomainModel(Invoice $invoice): self
@@ -35,7 +36,8 @@ final class InvoiceData extends Data
             status: $invoice->getStatus()->value,
             customerName: $invoice->getCustomerName(),
             customerEmail: $invoice->getCustomerEmail()->value(),
-            productLines: $productLines
+            productLines: $productLines,
+            total: $invoice->getTotal()
         );
     }
 }
