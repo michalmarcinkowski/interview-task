@@ -71,5 +71,5 @@ interface InvoiceServiceInterface
      * @throws InvoiceNotFoundException When invoice is not found
      * @throws \InvalidArgumentException When invoice cannot be sent
      */
-    public function send(SendInvoiceCommand $command): Invoice;
+    public function send(SendInvoiceCommand $command): void;
 }

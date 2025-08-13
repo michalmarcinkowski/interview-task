@@ -147,10 +147,11 @@ class InvoiceServiceTest extends TestCase
         $service = new InvoiceService($repository, $factory, $notificationService);
         $command = new SendInvoiceCommand($invoiceId);
 
-        $result = $service->send($command);
+        $service->send($command);
 
-        $this->assertInstanceOf(Invoice::class, $result);
-        $this->assertEquals(InvoiceStatus::SENDING, $result->getStatus());
+        // Verify that the invoice status was updated to SENDING
+        // The send method returns void, so we verify the side effects
+        $this->assertEquals(InvoiceStatus::SENDING, $invoice->getStatus());
     }
 
     public function testShouldThrowExceptionWhenSendingInvoiceWithEmptyProductLines(): void
