@@ -12,6 +12,7 @@ use Modules\Invoices\Application\Services\SendInvoiceHandler;
 use Modules\Invoices\Application\Services\NotificationServiceInterface;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\Exceptions\InvoiceNotFoundException;
+use Modules\Invoices\Domain\Exceptions\InvalidInvoiceStatusTransitionException;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Models\InvoiceProductLine;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
@@ -89,8 +90,8 @@ class SendInvoiceHandlerTest extends TestCase
         $command = new SendInvoiceCommand($invoiceId);
 
         // Then I should get a business rule violation exception
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice cannot be sent. Make sure it fulfills the business rules.');
+        $this->expectException(InvalidInvoiceStatusTransitionException::class);
+        $this->expectExceptionMessage('Cannot mark invoice');
 
         $handler->handle($command);
     }

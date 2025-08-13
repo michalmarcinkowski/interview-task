@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\Notifications\Infrastructure\Providers;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Modules\Notifications\Api\NotificationFacadeInterface;
 use Modules\Notifications\Application\Facades\NotificationFacade;
 use Modules\Notifications\Application\Services\WebhookSimulatorInterface;
 use Modules\Notifications\Infrastructure\Drivers\DummyDriver;
 use Modules\Notifications\Infrastructure\Services\WebhookSimulator;
-use Illuminate\Events\Dispatcher;
 
 final class NotificationServiceProvider extends ServiceProvider implements DeferrableProvider
 {

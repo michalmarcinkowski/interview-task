@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Invoices\Domain\Models;
 
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
+use Modules\Invoices\Domain\Exceptions\InvalidInvoiceStatusTransitionException;
 use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Models\InvoiceProductLine;
 use Modules\Invoices\Domain\ValueObjects\Email;
@@ -97,8 +98,8 @@ class InvoiceTest extends TestCase
         );
 
         $this->assertFalse($invoice->canBeSent());
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice cannot be sent. Make sure it fulfills the business rules.');
+        $this->expectException(InvalidInvoiceStatusTransitionException::class);
+        $this->expectExceptionMessage('Cannot mark invoice');
         
         $invoice->markAsSending();
     }
@@ -117,8 +118,8 @@ class InvoiceTest extends TestCase
         $this->assertEquals(InvoiceStatus::SENDING, $invoice->getStatus());
 
         // Try to send again - should fail because it's already in SENDING status
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice cannot be sent. Make sure it fulfills the business rules.');
+        $this->expectException(InvalidInvoiceStatusTransitionException::class);
+        $this->expectExceptionMessage('Cannot mark invoice');
 
         $invoice->markAsSending();
     }
@@ -150,8 +151,8 @@ class InvoiceTest extends TestCase
             ])
         );
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice cannot be marked as sent to client.');
+        $this->expectException(InvalidInvoiceStatusTransitionException::class);
+        $this->expectExceptionMessage('Cannot mark invoice');
 
         $invoice->markAsSentToClient();
     }
@@ -169,8 +170,8 @@ class InvoiceTest extends TestCase
         $invoice->markAsSending();
         $invoice->markAsSentToClient();
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice cannot be marked as sent to client.');
+        $this->expectException(InvalidInvoiceStatusTransitionException::class);
+        $this->expectExceptionMessage('Cannot mark invoice');
 
         $invoice->markAsSentToClient();
     }

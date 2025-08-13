@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Modules\Invoices\Application\Services;
 
 use Modules\Invoices\Application\Commands\SendInvoiceCommand;
+use Modules\Invoices\Domain\Exceptions\InvalidInvoiceStatusTransitionException;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
-use Webmozart\Assert\Assert;
 
 /**
  * Handles the invoice sending process.
@@ -52,7 +52,7 @@ class SendInvoiceHandler implements SendInvoiceHandlerInterface
      * @param  SendInvoiceCommand  $command  The send invoice command
      *
      * @throws \Modules\Invoices\Domain\Exceptions\InvoiceNotFoundException When invoice is not found
-     * @throws \InvalidArgumentException When invoice cannot be sent (business rules violation)
+     * @throws \Modules\Invoices\Domain\Exceptions\InvalidInvoiceStatusTransitionException When invoice cannot be sent (business rules violation)
      */
     public function handle(SendInvoiceCommand $command): void
     {
@@ -62,7 +62,16 @@ class SendInvoiceHandler implements SendInvoiceHandlerInterface
         // Step 2: Fail-fast validation - ensure invoice meets all business rules
         // Note: We validate here even though domain model validates in markAsSending()
         // This provides early failure detection and clear error messages
-        Assert::true($invoice->canBeSent(), 'Invoice cannot be sent. Make sure it fulfills the business rules.');
+        if (! $invoice->canBeSent()) {
+            $reason = ! $invoice->hasProductLines()
+                ? 'Invoice must have at least one product line.'
+                : 'Invoice must be in draft status.';
+
+            throw InvalidInvoiceStatusTransitionException::cannotMarkAsSendingDueToBusinessRules(
+                $invoice->getId(),
+                $reason
+            );
+        }
 
         // Step 3: Update invoice status to SENDING (domain model validates again)
         $invoice->markAsSending();
