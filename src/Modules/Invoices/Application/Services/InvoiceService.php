@@ -10,7 +10,7 @@ use Modules\Invoices\Domain\Models\Invoice;
 use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class InvoiceService
+class InvoiceService implements InvoiceServiceInterface
 {
     public function __construct(
         private InvoiceRepositoryInterface $repository,

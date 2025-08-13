@@ -12,8 +12,29 @@ use Modules\Invoices\Domain\ValueObjects\ProductLines;
 use Modules\Invoices\Domain\ValueObjects\Quantity;
 use Modules\Invoices\Domain\ValueObjects\UnitPrice;
 
-final class InvoiceFactory implements InvoiceFactoryInterface
+/**
+ * Invoice Factory Implementation
+ *
+ * Creates Invoice domain objects from CreateInvoiceCommand data.
+ * Handles the construction of Invoice aggregates with ProductLines.
+ *
+ * ## Responsibilities
+ * - Transforms command data into domain objects
+ * - Creates InvoiceProductLine entities from raw data
+ * - Ensures proper value object construction
+ *
+ * @see InvoiceFactoryInterface
+ * @see CreateInvoiceCommand
+ * @see Invoice
+ */
+class InvoiceFactory implements InvoiceFactoryInterface
 {
+    /**
+     * Creates an Invoice with ProductLines from command data.
+     *
+     * @param  CreateInvoiceCommand  $command  The invoice creation command
+     * @return Invoice A fully constructed Invoice domain object
+     */
     public function create(CreateInvoiceCommand $command): Invoice
     {
         $productLines = $this->createProductLines($command->productLines);
@@ -26,10 +47,12 @@ final class InvoiceFactory implements InvoiceFactoryInterface
     }
 
     /**
+     * Creates InvoiceProductLine entities from raw data.
+     *
      * @param  array<array{productName: string, quantity: int, unitPrice: int}>  $productLinesData
      * @return InvoiceProductLine[]
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException When data is invalid
      */
     private function createProductLines(array $productLinesData): array
     {

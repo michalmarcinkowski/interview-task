@@ -6,7 +6,7 @@ namespace Tests\Feature\Invoices\Presentation\Http;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
-use Modules\Invoices\Application\Services\InvoiceService;
+use Modules\Invoices\Application\Services\InvoiceServiceInterface;
 use Modules\Invoices\Domain\Enums\InvoiceStatus;
 use Modules\Invoices\Domain\Models\Invoice;
 use Ramsey\Uuid\Uuid;
@@ -16,14 +16,14 @@ class ViewInvoiceControllerTest extends TestCase
 {
     use WithFaker;
 
-    private InvoiceService $invoiceService;
+    private InvoiceServiceInterface $invoiceService;
 
     protected function setUp(): void
     {
         $this->setUpFaker();
         parent::setUp();
 
-        $this->invoiceService = app(InvoiceService::class);
+        $this->invoiceService = app(InvoiceServiceInterface::class);
     }
 
     public function test_should_view_invoice_successfully(): void

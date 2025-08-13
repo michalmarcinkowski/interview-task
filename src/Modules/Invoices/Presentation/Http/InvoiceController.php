@@ -6,7 +6,7 @@ namespace Modules\Invoices\Presentation\Http;
 
 use Illuminate\Routing\Controller;
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
-use Modules\Invoices\Application\Services\InvoiceService;
+use Modules\Invoices\Application\Services\InvoiceServiceInterface;
 use Modules\Invoices\Presentation\Http\Data\InvoiceData;
 use Modules\Invoices\Presentation\Http\Request\CreateInvoiceRequest;
 use Ramsey\Uuid\Uuid;
@@ -14,7 +14,7 @@ use Ramsey\Uuid\Uuid;
 class InvoiceController extends Controller
 {
     public function __construct(
-        private InvoiceService $invoiceService
+        private InvoiceServiceInterface $invoiceService
     ) {}
 
     public function create(CreateInvoiceRequest $request)
