@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Modules\Invoices\Application\Commands\CreateInvoiceCommand;
 use Modules\Invoices\Application\Commands\SendInvoiceCommand;
 use Modules\Invoices\Application\Services\InvoiceServiceInterface;
+use Modules\Invoices\Application\Services\SendInvoiceHandlerInterface;
 use Modules\Invoices\Presentation\Http\Data\InvoiceData;
 use Modules\Invoices\Presentation\Http\Request\CreateInvoiceRequest;
 use Ramsey\Uuid\Uuid;
@@ -16,7 +17,8 @@ use Ramsey\Uuid\Uuid;
 class InvoiceController extends Controller
 {
     public function __construct(
-        private InvoiceServiceInterface $invoiceService
+        private InvoiceServiceInterface $invoiceService,
+        private SendInvoiceHandlerInterface $sendInvoiceHandler
     ) {}
 
     public function create(CreateInvoiceRequest $request)
@@ -41,7 +43,7 @@ class InvoiceController extends Controller
     public function send(string $id)
     {
         $sendInvoiceCommand = new SendInvoiceCommand(Uuid::fromString($id));
-        $this->invoiceService->send($sendInvoiceCommand);
+        $this->sendInvoiceHandler->handle($sendInvoiceCommand);
 
         return response()->json(['message' => 'Invoice sending process initiated successfully'], Response::HTTP_ACCEPTED);
     }
