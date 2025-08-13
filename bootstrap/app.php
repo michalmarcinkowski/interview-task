@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Modules\Invoices\Domain\Exceptions\NotFoundException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -22,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return new JsonResponse([
                     'error' => 'Not found',
                     'message' => $e->getMessage(),
-                ], 404);
+                ], Response::HTTP_NOT_FOUND);
             }
         });
     })->create();
