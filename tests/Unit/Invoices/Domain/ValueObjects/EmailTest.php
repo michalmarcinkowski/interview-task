@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Invoices\Domain\ValueObjects;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Modules\Invoices\Domain\ValueObjects\Email;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 use Webmozart\Assert\InvalidArgumentException;
 
 class EmailTest extends TestCase
@@ -24,7 +24,7 @@ class EmailTest extends TestCase
     public function testFromStringWithInvalidEmails(string $invalidEmail): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected a value to be a valid e-mail address. Got: "' . $invalidEmail . '"');
+        $this->expectExceptionMessage('Expected a value to be a valid e-mail address. Got: "'.$invalidEmail.'"');
 
         Email::fromString($invalidEmail);
     }
