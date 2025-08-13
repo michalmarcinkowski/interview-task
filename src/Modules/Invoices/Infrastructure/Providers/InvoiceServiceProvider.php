@@ -33,7 +33,7 @@ class InvoiceServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $dispatcher = $this->app->make(Dispatcher::class);
-        
+
         $dispatcher->listen(
             ResourceDeliveredEvent::class,
             InvoiceDeliveredListener::class

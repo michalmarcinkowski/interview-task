@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
 use Modules\Notifications\Api\Dtos\NotifyData;
 use Modules\Notifications\Application\Facades\NotificationFacade;
+use Modules\Notifications\Application\Services\WebhookSimulatorInterface;
 use Modules\Notifications\Infrastructure\Drivers\DriverInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +17,7 @@ final class NotificationFacadeTest extends TestCase
     use WithFaker;
 
     private DriverInterface $driver;
-
+    private WebhookSimulatorInterface $webhookSimulator;
     private NotificationFacade $notificationFacade;
 
     protected function setUp(): void
@@ -24,8 +25,10 @@ final class NotificationFacadeTest extends TestCase
         $this->setUpFaker();
 
         $this->driver = $this->createMock(DriverInterface::class);
+        $this->webhookSimulator = $this->createMock(WebhookSimulatorInterface::class);
         $this->notificationFacade = new NotificationFacade(
             driver: $this->driver,
+            webhookSimulator: $this->webhookSimulator,
         );
     }
 
@@ -38,7 +41,13 @@ final class NotificationFacadeTest extends TestCase
             message: $this->faker->sentence(),
         );
 
-        $this->driver->expects($this->once())->method('send');
+        $this->driver->expects($this->once())
+            ->method('send')
+            ->willReturn(true);
+
+        $this->webhookSimulator->expects($this->once())
+            ->method('simulateDeliveryConfirmation')
+            ->with($data->resourceId->toString());
 
         $this->notificationFacade->notify($data);
     }

@@ -151,7 +151,7 @@ class InvoiceTest extends TestCase
         );
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice must be in SENDING status to be marked as sent to client.');
+        $this->expectExceptionMessage('Invoice cannot be marked as sent to client.');
 
         $invoice->markAsSentToClient();
     }
@@ -170,9 +170,53 @@ class InvoiceTest extends TestCase
         $invoice->markAsSentToClient();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invoice must be in SENDING status to be marked as sent to client.');
+        $this->expectExceptionMessage('Invoice cannot be marked as sent to client.');
 
         $invoice->markAsSentToClient();
+    }
+
+    public function testShouldCorrectlyIdentifyInvoiceAsSentToClient(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        // Initially should not be sent to client
+        $this->assertFalse($invoice->isSentToClientAlready());
+
+        // After marking as sending, should still not be sent to client
+        $invoice->markAsSending();
+        $this->assertFalse($invoice->isSentToClientAlready());
+
+        // After marking as sent to client, should return true
+        $invoice->markAsSentToClient();
+        $this->assertTrue($invoice->isSentToClientAlready());
+    }
+
+    public function testShouldCorrectlyIdentifyIfInvoiceCanBeMarkedAsSentToClient(): void
+    {
+        $invoice = Invoice::create(
+            'John Doe',
+            Email::fromString('john@example.com'),
+            ProductLines::fromArray([
+                InvoiceProductLine::create('Product A', Quantity::fromInteger(2), UnitPrice::fromInteger(100)),
+            ])
+        );
+
+        // Initially in DRAFT status, cannot be marked as sent to client
+        $this->assertFalse($invoice->canBeMarkedAsSentToClient());
+
+        // After marking as sending, can be marked as sent to client
+        $invoice->markAsSending();
+        $this->assertTrue($invoice->canBeMarkedAsSentToClient());
+
+        // After marking as sent to client, cannot be marked as sent to client again
+        $invoice->markAsSentToClient();
+        $this->assertFalse($invoice->canBeMarkedAsSentToClient());
     }
 
     //
